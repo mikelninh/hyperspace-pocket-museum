@@ -1,22 +1,36 @@
-# HYPERSPACE Pocket Museum — v0.3.1
+# HYPERSPACE Pocket Museum
 
 **Discover → learn → keep → share.**
 
-A static, open-source vertical slice for the first complete `EARTH_001` collection.
+Pocket Museum is an open-source collectible learning experiment: tiny digital objects that are delightful to collect and each teach one memorable thing about the real world.
+
+## EARTH_001
+
+The first collection contains eight wonders:
+
+1. Obsidian
+2. Labradorite
+3. Amethyst
+4. Malachite
+5. Pyrite
+6. Opal
+7. Bismuth
+8. Meteorite
 
 ## What works
 
 - all 8 wonders are playable
-- random or chosen mystery discovery
-- separate science vs culture/lore panels
-- KEEP adds an object to a persistent local collection
+- mystery discovery + reveal
+- science separated from culture / folklore
+- persistent local collection
 - collection cabinet
-- Telegram / X / native / copy sharing hooks
-- source links per wonder
-- local progress reset
+- Telegram sharing
+- X sharing
+- native device sharing / copy
+- source links
 - responsive mobile-first UI
-- no backend, account or build step
-- all production pages use repository-local image assets
+- zero backend and zero build step
+- repository-local SVG artwork, so the images do not depend on ChatGPT sandbox paths
 
 ## Run locally
 
@@ -24,46 +38,58 @@ A static, open-source vertical slice for the first complete `EARTH_001` collecti
 python -m http.server 8000
 ```
 
-Then open `http://localhost:8000`.
+Then visit:
 
-> Don’t double-click `index.html` from the filesystem. Serving the folder keeps JSON and asset loading consistent with deployment.
-
-## GitHub Pages
-
-The site is intentionally static and can be served directly from the repository root with GitHub Pages.
-
-## Project structure
-
-```text
-.
-├── index.html
-├── app.js
-├── styles.css
-├── assets/
-│   └── wonders/
-├── data/
-│   └── wonders.json
-├── docs/
-│   ├── GITHUB.md
-│   ├── MASTERPLAN.md
-│   └── SOURCES.md
-├── .nojekyll
-└── LICENSE
+```
+http://localhost:8000
 ```
 
-## v0.4 target
+## Deploy
 
-1. dedicated share-card image renderer
-2. stronger unique reveal animation per mineral
-3. Telegram Mini App shell
-4. `Discover Together` group mechanic
-5. accessibility + device testing pass
-6. replace prototype board crops with final production assets
+This is a static site and can be deployed directly with GitHub Pages.
 
-## Content rule
+See [docs/DEPLOY.md](docs/DEPLOY.md).
 
-Scientific statements and historical/cultural beliefs are displayed separately. Cultural symbolism is not presented as scientific evidence.
+## Product loop
+
+```
+DISCOVER
+   ↓
+LEARN
+   ↓
+KEEP
+   ↓
+COLLECT
+   ↓
+SHARE
+   ↓
+A FRIEND DISCOVERS
+```
+
+## Principles
+
+- the object should be lovable before the label is read
+- scientific claims and belief / folklore are never presented as the same thing
+- meaningful free discovery should remain part of the museum
+- future paid packs, if built, must use transparent probabilities and supply
+- no dark patterns or fake urgency
+- open-source the core experience where practical
+
+## Roadmap
+
+- [x] complete 8-object collection engine
+- [x] reliable repository-local art
+- [x] public open-source repository
+- [ ] 12/10 final pixel / 2.5D production art
+- [ ] dedicated visual share cards
+- [ ] Telegram Mini App
+- [ ] Discover Together
+- [ ] GitHub Pages public release
+- [ ] Telegram contest adaptation
+- [ ] transparent supporter packs later
+
+See [docs/MASTERPLAN.md](docs/MASTERPLAN.md) and [docs/ART_DIRECTION.md](docs/ART_DIRECTION.md).
 
 ## Licence
 
-MIT for code. The current generated prototype art is included for prototyping; define the final art licence before public release.
+Code is MIT licensed. Prototype artwork is included for development and experimentation; define the final art licence before a commercial release.
