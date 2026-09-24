@@ -30,7 +30,7 @@ The first collection contains eight wonders:
 - source links
 - responsive mobile-first UI
 - zero backend and zero build step
-- repository-local SVG artwork, so the images do not depend on ChatGPT sandbox paths
+- the approved 2.5D pixel-diorama art packed into a repository-local atlas, so the visuals do not depend on ChatGPT sandbox paths
 
 ## Run locally
 
@@ -78,7 +78,7 @@ A FRIEND DISCOVERS
 ## Roadmap
 
 - [x] complete 8-object collection engine
-- [x] reliable repository-local art
+- [x] approved 2.5D art restored as the visual source of truth
 - [x] public open-source repository
 - [ ] 12/10 final pixel / 2.5D production art
 - [ ] dedicated visual share cards
