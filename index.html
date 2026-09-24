@@ -92,7 +92,7 @@ const byId=Object.fromEntries(WONDERS.map(w=>[w.id,w]));
 const discovered=new Set(JSON.parse(localStorage.getItem("pm-discovered")||"[]"));
 const kept=new Set(JSON.parse(localStorage.getItem("pm-kept")||"[]"));
 let selected=localStorage.getItem("pm-selected")||null,pending=null;
-const $=s=>document.querySelector(s),$=s=>[...document.querySelectorAll(s)];
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const APPROVED_ART={};
 const ART_ORDER=["obsidian","labradorite","amethyst","malachite","pyrite","opal","bismuth","meteorite"];
 function asset(id){return APPROVED_ART[id]||""}
@@ -151,7 +151,7 @@ $("#copy").onclick=async()=>{const w=byId[selected];try{await navigator.clipboar
 $("#native").onclick=async()=>{const w=byId[selected];if(navigator.share)try{await navigator.share({title:"Pocket Museum — "+w.name,text:shareText(w),url:shareUrl(w)})}catch{}else toast("Native share unavailable")}
 $("#download-card").onclick=()=>{const w=byId[selected];downloadCard(w);toast("Collectible share card saved ✦")}
 function showScreen(s){["discover","collection","about"].forEach(n=>$("#"+n+"-screen").hidden=n!==s);$$(".tab").forEach(b=>b.classList.toggle("active",b.dataset.screen===s));if(s==="collection")cabinet()}
-$(".tab").forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+$$(".tab").forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
 const params=new URLSearchParams(location.search),incoming=params.get("wonder");
 if(incoming&&byId[incoming]){
   $("#arrival").classList.toggle("show",params.get("from")==="share");
