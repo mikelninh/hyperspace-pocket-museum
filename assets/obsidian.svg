@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="OBSIDIAN">
+<defs>
+  <radialGradient id="bg"><stop stop-color="#f0ad49" stop-opacity=".18"/><stop offset=".55" stop-color="#111621"/><stop offset="1" stop-color="#07090d"/></radialGradient>
+  <filter id="glow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="640" height="640" rx="44" fill="url(#bg)"/>
+<g fill="#f0ad49" opacity=".85"><path d="M90 87v16M82 95h16" stroke="#f0ad49" stroke-width="3"/><path d="M530 92v16M522 100h16" stroke="#f0ad49" stroke-width="3"/><path d="M565 237v16M557 245h16" stroke="#f0ad49" stroke-width="3"/><path d="M82 322v16M74 330h16" stroke="#f0ad49" stroke-width="3"/><path d="M505 507v16M497 515h16" stroke="#f0ad49" stroke-width="3"/><path d="M150 512v16M142 520h16" stroke="#f0ad49" stroke-width="3"/></g>
+<circle cx="320" cy="300" r="214" fill="none" stroke="#f0ad49" stroke-opacity=".16" stroke-width="2"/>
+
+<g filter="url(#glow)">
+<path d="M315 105 430 190 472 332 390 476 245 500 165 365 198 210Z" fill="#08090d" stroke="#6b707b" stroke-width="8"/>
+<path d="M315 105 365 230 198 210Z" fill="#777b87"/><path d="m365 230 107 102-168 42Z" fill="#181b22"/><path d="m198 210 167 20-61 144-139-9Z" fill="#242832"/>
+<path d="M365 230 334 330 390 476" fill="none" stroke="#ffb22f" stroke-width="12"/><path d="m334 330-85 72" stroke="#ffb22f" stroke-width="9"/><path d="m304 374 40 74" stroke="#ffb22f" stroke-width="8"/>
+</g>
+<path d="M88 470 Q135 415 180 470" fill="#33251b"/><rect x="105" y="430" width="52" height="45" rx="8" fill="#5a3c20"/><rect x="122" y="405" width="18" height="34" fill="#d78a2f"/>
+<path d="M100 495h440" stroke="#98713f" stroke-width="10" opacity=".6"/>
+<text x="320" y="585" text-anchor="middle" fill="#f4eee4" font-family="Georgia,serif" font-size="30" letter-spacing="3">OBSIDIAN</text>
+</svg>
