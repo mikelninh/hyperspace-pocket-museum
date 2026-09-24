@@ -6,6 +6,13 @@
 <meta name="theme-color" content="#07090d">
 <title>HYPERSPACE — Pocket Museum</title>
 <meta name="description" content="Collect real wonders. Learn the science. Explore the stories humans attached to them.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="HYPERSPACE Pocket Museum">
+<meta property="og:description" content="Tiny wonders. Big perspectives. Discover → learn → keep → share.">
+<meta property="og:url" content="https://mikelninh.github.io/hyperspace-pocket-museum/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="HYPERSPACE Pocket Museum">
+<meta name="twitter:description" content="Tiny wonders. Big perspectives.">
 <style>
 :root{--bg:#07090d;--panel:#0d1118;--panel2:#121824;--text:#f6f1e8;--muted:#9aa2ae;--line:#252c39;--gold:#ddb774;--accent:#ddb774}
 *{box-sizing:border-box}body{margin:0;min-height:100vh;color:var(--text);background:radial-gradient(circle at 50% -10%,#1a2132 0,transparent 30%),linear-gradient(#080a10,#050609 70%);font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
@@ -19,7 +26,7 @@ button,a{font:inherit}.app{max-width:760px;margin:auto;padding:18px 14px 100px}.
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.card{position:relative;border:1px solid var(--line);border-radius:16px;background:#0c1017;color:var(--text);padding:7px;text-align:left;cursor:pointer;min-width:0}.card img{display:block;width:100%;aspect-ratio:1;object-fit:contain;border-radius:11px;background:#090b10}.card.locked img{filter:blur(6px) brightness(.2);transform:scale(.94)}.card .n{margin:7px 2px 0;font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card .s{margin:2px;color:var(--muted);font-size:9px}.card.active{border-color:var(--accent)}.check{position:absolute;top:10px;right:10px;width:21px;height:21px;border-radius:50%;display:grid;place-items:center;background:#e1c17f;color:#161109;font-size:11px;font-weight:900}
 .cabinet{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.empty{grid-column:1/-1;border:1px dashed var(--line);border-radius:18px;padding:30px;text-align:center;color:var(--muted)}
 .nav{position:fixed;left:50%;bottom:12px;transform:translateX(-50%);width:min(calc(100% - 24px),720px);display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:6px;border:1px solid var(--line);border-radius:18px;background:rgba(8,10,14,.93);backdrop-filter:blur(16px);z-index:20}.tab{min-height:46px;border:0;border-radius:12px;background:transparent;color:var(--muted);cursor:pointer}.tab.active{background:#151a23;color:var(--text)}[hidden]{display:none!important}
-.sheet-bg{position:fixed;inset:0;z-index:50;display:grid;place-items:end center;background:rgba(0,0,0,.68);padding:15px}.sheet{width:min(100%,520px);border:1px solid var(--line);border-radius:22px;background:#0d1118;padding:16px}.sheet h3{font:500 20px Georgia,serif;margin:0 0 5px}.sheet p{margin:0 0 13px;color:var(--muted);font-size:12px}.share-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:80;background:#161c26;border:1px solid var(--line);border-radius:999px;padding:9px 13px;font-size:12px;transition:.25s}.toast.show{transform:translateX(-50%) translateY(0)}
+.sheet-bg{position:fixed;inset:0;z-index:50;display:grid;place-items:end center;background:rgba(0,0,0,.68);padding:15px}.sheet{width:min(100%,520px);border:1px solid var(--line);border-radius:22px;background:#0d1118;padding:16px}.sheet h3{font:500 20px Georgia,serif;margin:0 0 5px}.sheet p{margin:0 0 13px;color:var(--muted);font-size:12px}.share-card{position:relative;overflow:hidden;display:grid;grid-template-columns:116px 1fr;gap:14px;align-items:center;margin:14px 0;padding:14px;border:1px solid var(--line);border-radius:18px;background:radial-gradient(circle at 20% 25%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 32%),#090c12}.share-card img{width:116px;height:116px;object-fit:contain}.share-card .sc-eye{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent)}.share-card .sc-name{font:500 24px Georgia,serif;letter-spacing:.06em;margin:4px 0}.share-card .sc-hook{font:italic 13px/1.45 Georgia,serif;color:#ded7cc}.share-card .sc-code{margin-top:8px;color:var(--muted);font-size:10px;letter-spacing:.14em}.arrival{display:none;margin:0 0 14px;padding:10px 12px;border:1px solid color-mix(in srgb,var(--accent) 50%,var(--line));border-radius:14px;background:color-mix(in srgb,var(--accent) 8%,transparent);color:#e9dfcf;font-size:12px}.arrival.show{display:block}.share-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.toast{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-80px);z-index:80;background:#161c26;border:1px solid var(--line);border-radius:999px;padding:9px 13px;font-size:12px;transition:.25s}.toast.show{transform:translateX(-50%) translateY(0)}
 .about{border:1px solid var(--line);border-radius:20px;background:#0d1118;padding:18px;color:#d9d6cf;line-height:1.6}.about h2{font:500 24px Georgia,serif;margin-top:0}.about code{color:#e5c27e}
 @media(max-width:540px){.grid{grid-template-columns:repeat(2,1fr)}.stage{min-height:360px}.hero{width:92%}.actions,.share-grid{grid-template-columns:1fr}.top{align-items:flex-start}h1{font-size:24px}.cabinet{grid-template-columns:1fr 1fr}}
 @media(prefers-reduced-motion:reduce){.revealing .hero{animation:none}.hero,.toast{transition:none}}
@@ -30,6 +37,7 @@ button,a{font:inherit}.app{max-width:760px;margin:auto;padding:18px 14px 100px}.
 <main class="app">
 <header class="top"><div><div class="eyebrow">HYPERSPACE · EARTH_001</div><h1>POCKET MUSEUM</h1><p class="tag">Small objects. Big perspectives.</p></div><div id="progress" class="progress">0 / 8 kept</div></header>
 
+<div id="arrival" class="arrival">Someone sent you a tiny wonder. It is still sealed. ✦</div>
 <section id="discover-screen">
   <article class="panel">
     <div id="stage" class="stage locked">
@@ -60,7 +68,14 @@ button,a{font:inherit}.app{max-width:760px;margin:auto;padding:18px 14px 100px}.
 
 <nav class="nav"><button class="tab active" data-screen="discover">Discover</button><button class="tab" data-screen="collection">Collection</button><button class="tab" data-screen="about">About</button></nav>
 
-<div id="share-sheet" class="sheet-bg" hidden><div class="sheet"><h3 id="share-title">Share wonder</h3><p id="share-preview"></p><div class="share-grid"><button id="telegram" class="btn">Telegram</button><button id="xshare" class="btn">X</button><button id="native" class="btn">Device share</button><button id="copy" class="btn">Copy</button><button id="close" class="btn" style="grid-column:1/-1">Close</button></div></div></div>
+<div id="share-sheet" class="sheet-bg" hidden><div class="sheet">
+<h3 id="share-title">Share wonder</h3><p id="share-preview">Send curiosity, not spoilers.</p>
+<div class="share-card">
+  <img id="share-art" alt="">
+  <div><div class="sc-eye">I FOUND A WONDER ✦</div><div id="share-card-name" class="sc-name"></div><div id="share-card-hook" class="sc-hook"></div><div id="share-card-code" class="sc-code"></div></div>
+</div>
+<div class="share-grid"><button id="telegram" class="btn">Telegram</button><button id="xshare" class="btn">X</button><button id="native" class="btn">Device share</button><button id="copy" class="btn">Copy deep link</button><button id="download-card" class="btn">Download card</button><button id="close" class="btn">Close</button></div>
+</div></div>
 
 <script>
 const WONDERS=[
@@ -92,16 +107,39 @@ function render(){progress();grid();cabinet();if(selected&&discovered.has(select
 $("#discover").onclick=()=>{const w=pending?byId[pending]:next();if(!w)return;$("#stage").className="stage revealing";$("#mystery").hidden=true;$("#stage-label").textContent="DISCOVERING…";$("#discover").disabled=true;setAccent(w);setTimeout(()=>{discovered.add(w.id);selected=w.id;pending=null;save();toast("You found "+w.name+" ✦");render()},1150)}
 $("#keep").onclick=()=>{if(!selected)return;kept.add(selected);save();toast(byId[selected].name+" placed in your cabinet");render()}
 $("#surprise").onclick=()=>{const w=next();if(w){mystery(w);toast("A mystery is waiting…")}else{const r=WONDERS[Math.floor(Math.random()*WONDERS.length)];detail(r);toast("Revisiting "+r.name)}window.scrollTo({top:0,behavior:"smooth"})}
-function shareText(w){return "I found "+w.name+" in HYPERSPACE Pocket Museum ✦\n"+w.hook+"\n\nEARTH_"+w.number}
-function shareUrl(){return location.href.split("#")[0]}
-$("#share").onclick=()=>{const w=byId[selected];$("#share-title").textContent="Share "+w.name;$("#share-preview").textContent=w.hook;$("#share-sheet").hidden=false}
+function baseUrl(){return location.origin+location.pathname}
+function shareText(w){return "I found "+w.name+" in HYPERSPACE Pocket Museum ✦\n"+w.hook+"\n\nCan you discover it too?"}
+function shareUrl(w){return baseUrl()+"?wonder="+encodeURIComponent(w.id)+"&from=share"}
+function shareCardSvg(w){
+  const safe=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
+  const art=new URL(asset(w.id),location.href).href;
+  return '<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">'+
+  '<rect width="1200" height="630" fill="#080b10"/><circle cx="260" cy="270" r="230" fill="'+w.accent+'" opacity=".10"/>'+
+  '<image href="'+safe(art)+'" x="80" y="75" width="430" height="430"/>'+
+  '<text x="560" y="145" fill="'+w.accent+'" font-family="Arial,sans-serif" font-size="24" letter-spacing="5">HYPERSPACE · POCKET MUSEUM</text>'+
+  '<text x="560" y="250" fill="#f6f1e8" font-family="Georgia,serif" font-size="74">'+safe(w.name.toUpperCase())+'</text>'+
+  '<text x="560" y="305" fill="#9aa2ae" font-family="Arial,sans-serif" font-size="28">'+safe(w.subtitle)+'</text>'+
+  '<foreignObject x="560" y="345" width="560" height="130"><div xmlns="http://www.w3.org/1999/xhtml" style="color:#e8dfd3;font:italic 30px Georgia,serif;line-height:1.35">'+safe(w.hook)+'</div></foreignObject>'+
+  '<text x="560" y="545" fill="#ddb774" font-family="Arial,sans-serif" font-size="22" letter-spacing="5">EARTH_'+w.number+' · DISCOVER → LEARN → KEEP → SHARE</text></svg>';
+}
+function downloadCard(w){
+  const blob=new Blob([shareCardSvg(w)],{type:"image/svg+xml;charset=utf-8"}),url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download="pocket-museum-"+w.id+".svg";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$("#share").onclick=()=>{const w=byId[selected];$("#share-title").textContent="Share "+w.name;$("#share-preview").textContent="Your friend receives the same wonder sealed — no spoiler needed.";$("#share-art").src=asset(w.id);$("#share-art").alt=w.name;$("#share-card-name").textContent=w.name;$("#share-card-hook").textContent=w.hook;$("#share-card-code").textContent="EARTH_"+w.number;$("#share-sheet").hidden=false}
 $("#close").onclick=()=>$("#share-sheet").hidden=true;$("#share-sheet").onclick=e=>{if(e.target.id==="share-sheet")$("#share-sheet").hidden=true}
-$("#telegram").onclick=()=>{const w=byId[selected];open("https://t.me/share/url?url="+encodeURIComponent(shareUrl())+"&text="+encodeURIComponent(shareText(w)),"_blank","noopener")}
-$("#xshare").onclick=()=>{const w=byId[selected];open("https://x.com/intent/post?text="+encodeURIComponent(shareText(w)+"\n"+shareUrl()),"_blank","noopener")}
-$("#copy").onclick=async()=>{const w=byId[selected];try{await navigator.clipboard.writeText(shareText(w)+"\n"+shareUrl());toast("Share text copied ✦");$("#share-sheet").hidden=true}catch{toast("Copy unavailable")}}
-$("#native").onclick=async()=>{const w=byId[selected];if(navigator.share)try{await navigator.share({title:"Pocket Museum — "+w.name,text:shareText(w),url:shareUrl()})}catch{}else toast("Native share unavailable")}
+$("#telegram").onclick=()=>{const w=byId[selected];open("https://t.me/share/url?url="+encodeURIComponent(shareUrl(w))+"&text="+encodeURIComponent(shareText(w)),"_blank","noopener")}
+$("#xshare").onclick=()=>{const w=byId[selected];open("https://x.com/intent/post?text="+encodeURIComponent(shareText(w)+"\n"+shareUrl(w)),"_blank","noopener")}
+$("#copy").onclick=async()=>{const w=byId[selected];try{await navigator.clipboard.writeText(shareUrl(w));toast("Deep link copied ✦");$("#share-sheet").hidden=true}catch{toast("Copy unavailable")}}
+$("#native").onclick=async()=>{const w=byId[selected];if(navigator.share)try{await navigator.share({title:"Pocket Museum — "+w.name,text:shareText(w),url:shareUrl(w)})}catch{}else toast("Native share unavailable")}
+$("#download-card").onclick=()=>{const w=byId[selected];downloadCard(w);toast("Collectible share card saved ✦")}
 function showScreen(s){["discover","collection","about"].forEach(n=>$("#"+n+"-screen").hidden=n!==s);$$(".tab").forEach(b=>b.classList.toggle("active",b.dataset.screen===s));if(s==="collection")cabinet()}
-$$(".tab").forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+$(".tab").forEach(b=>b.onclick=()=>showScreen(b.dataset.screen));
+const params=new URLSearchParams(location.search),incoming=params.get("wonder");
+if(incoming&&byId[incoming]){
+  $("#arrival").classList.toggle("show",params.get("from")==="share");
+  if(discovered.has(incoming)){selected=incoming;pending=null}else{selected=null;pending=incoming}
+}
 render();
 </script>
 </body></html>
