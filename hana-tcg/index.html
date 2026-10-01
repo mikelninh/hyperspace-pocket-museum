@@ -156,7 +156,13 @@ function context(v){
     const z=locOf(v,pendingTarget);return '<section class="context"><div class="context-title">'+esc(c.n)+'</div><div class="context-copy">Choose where to move <b>'+esc(v.cards[z.u.cardId].n)+'</b>.</div><div class="context-actions">'+v.scenes.map((s,i)=>i===z.si?'':'<button class="btn" data-move-effect="'+i+'">'+esc(s.name)+'</button>').join("")+'<button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
   }
   let who=(c.t==="item"||c.target==="own")?"one of your characters":(c.target==="enemy"?"an enemy character":"a character");
-  return '<section class="context"><div class="context-title">'+esc(c.n)+'</div><div class="context-copy">'+esc(c.x)+'<br><b>Tap '+who+' to target it.</b> You can switch Scenes while this card stays selected.</div><div class="context-actions"><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
+  const visible=v.scenes[activeScene].units.filter(u=>isValidTarget(v,u,activeScene));
+  const targetHelp=visible.length?'<b>Tap '+who+' highlighted above.</b>':'<b>No valid target in this Scene.</b> Switch Scene above or choose another card.';
+  return '<section class="context"><div class="context-title">'+esc(c.n)+'</div><div class="context-copy">'+esc(c.x)+'<br>'+targetHelp+'</div><div class="context-actions"><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
+ }
+ if(mode==="challenge"&&selectedUnit){
+   const z=locOf(v,selectedUnit),name=z?v.cards[z.u.cardId].n:"character";
+   return '<section class="context"><div class="context-title">CHALLENGE WITH '+esc(name)+'</div><div class="context-copy">Tap a highlighted enemy in this Scene.</div><div class="context-actions"><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
  }
  if(selectedUnit){
   const z=locOf(v,selectedUnit);if(!z)return "";
@@ -167,9 +173,6 @@ function context(v){
   if(z.u.ready)v.scenes.forEach((s,i)=>{if(i!==z.si)actions.push('<button class="btn" data-move-unit="'+i+'">Move → '+esc(s.name)+'</button>')});
   actions.push('<button class="btn ghost" data-ui="clear">Cancel</button>');
   return '<section class="context"><div class="context-title">'+esc(c.n)+' · '+(z.u.ready?'READY':'USED')+'</div><div class="context-copy">'+(z.u.ready?'Choose one action for this character.':'This character is exhausted until the next round.')+'</div><div class="context-actions">'+actions.join("")+'</div></section>';
- }
- if(mode==="challenge"&&selectedUnit){
-   return "";
  }
  if(canClaim(v,activeScene))return '<section class="context"><div class="context-title">YOU CONTROL THIS SCENE</div><div class="context-copy">Tap one of your ready characters below, then Claim a Memory.</div></section>';
  return '<section class="context"><div class="context-title">YOUR DECISION</div><div class="context-copy">Tap a card in your hand to play it, or tap one of your ready characters to move, fight, or claim.</div></section>';
@@ -190,7 +193,7 @@ function tools(v){
  return '<div class="turn-tools"><button class="btn" data-action="overdrive" '+(!v.yourTurn||v.overdriveUsed[v.you]?'disabled':'')+'>Overdrive +2</button><button class="btn" data-action="pass" '+(!v.yourTurn?'disabled':'')+'>Pass</button></div>';
 }
 function feedback(v,msg){
- if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.4 needs.';
+ if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.4 needs.</div>';
  return '<div class="feedback"><div class="eyebrow">30-second playtest</div><div class="feedback-grid"><select id="fun"><option value="">Fun 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="clear"><option value="">Clarity 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="again"><option value="">Play again?</option><option value="yes">Yes</option><option value="no">No</option></select><button class="btn primary" data-ui="feedback">Send feedback</button></div></div>';
 }
 function result(v,msg){
@@ -210,6 +213,7 @@ function render(msg){
  root.innerHTML=game(v,msg);
 }
 function clearSelection(){selectedCard=null;selectedUnit=null;pendingTarget=null;mode=null}
+function revealContext(){requestAnimationFrame(()=>{const el=document.querySelector(".context");if(el)el.scrollIntoView({behavior:"smooth",block:"nearest"})})}
 async function act(action){
  if(busy)return;try{busy=true;errorText="";const msg=await api({op:"action",action});clearSelection();render(msg)}catch(e){errorText=e.message;if(last)render(last)}finally{busy=false}
 }
@@ -226,7 +230,7 @@ root.addEventListener("click",async e=>{
  if(b.dataset.deck){await act({type:"selectDeck",deck:b.dataset.deck});return}
  if(b.dataset.scene!==undefined){activeScene=Math.max(0,Math.min(2,Number(b.dataset.scene)||0));render(last);return}
  if(b.dataset.card){
-   const v=last.view,x=v.hands.find(x=>x.uid===b.dataset.card);selectedUnit=null;pendingTarget=null;mode=null;selectedCard=selectedCard?.uid===x.uid?null:x;render(last);return;
+   const v=last.view,x=v.hands.find(x=>x.uid===b.dataset.card);selectedUnit=null;pendingTarget=null;mode=null;selectedCard=selectedCard?.uid===x.uid?null:x;render(last);revealContext();return;
  }
  if(b.dataset.playCard){
    const a={type:"play",uid:b.dataset.playCard};if(b.dataset.playScene!==undefined)a.scene=Number(b.dataset.playScene);await act(a);return;
@@ -239,16 +243,16 @@ root.addEventListener("click",async e=>{
      if(c.t==="item"&&own){await act({type:"play",uid:selectedCard.uid,target:z.u.uid});return}
      if(c.target==="own"&&own){await act({type:"play",uid:selectedCard.uid,target:z.u.uid});return}
      if(c.target==="enemy"&&!own){await act({type:"play",uid:selectedCard.uid,target:z.u.uid});return}
-     if((c.target==="ownMove"&&own)||(c.target==="enemyMove"&&!own)){pendingTarget=z.u.uid;render(last);return}
+     if((c.target==="ownMove"&&own)||(c.target==="enemyMove"&&!own)){pendingTarget=z.u.uid;render(last);revealContext();return}
      return;
    }
    if(mode==="challenge"&&selectedUnit&&z.u.owner===v.opponent){await act({type:"challenge",attacker:selectedUnit,target:z.u.uid});return}
-   if(z.u.owner===v.you){selectedUnit=selectedUnit===z.u.uid?null:z.u.uid;mode=null;render(last)}return;
+   if(z.u.owner===v.you){selectedUnit=selectedUnit===z.u.uid?null:z.u.uid;mode=null;render(last);revealContext()}return;
  }
  if(b.dataset.moveEffect!==undefined&&selectedCard&&pendingTarget){await act({type:"play",uid:selectedCard.uid,target:pendingTarget,scene:Number(b.dataset.moveEffect)});return}
  if(b.dataset.moveUnit!==undefined&&selectedUnit){await act({type:"move",uid:selectedUnit,scene:Number(b.dataset.moveUnit)});return}
  if(b.dataset.unitAction==="claim"&&selectedUnit){await act({type:"claim",uid:selectedUnit});return}
- if(b.dataset.ui==="challenge"){mode="challenge";render(last);return}
+ if(b.dataset.ui==="challenge"){mode="challenge";render(last);revealContext();return}
  if(b.dataset.action){await act({type:b.dataset.action});return}
  if(b.dataset.ui==="reset"){try{feedbackSent=false;clearSelection();render(await api({op:"reset"}))}catch(e){errorText=e.message;render(last)}return}
  if(b.dataset.ui==="feedback"){
