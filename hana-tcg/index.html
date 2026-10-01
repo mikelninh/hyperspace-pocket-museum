@@ -134,7 +134,7 @@ function shellTop(){
  return '<div class="shell-top"><div class="brand"><div class="brand-mark"></div><strong>HANA TCG</strong><span class="version">v0.6</span></div><button class="btn small ghost" data-ui="rules">Rules</button></div>';
 }
 function rules(){
- return '<div class="rules"><b>WIN</b> · Claim 5 Memories.<br><b>TURN</b> · Take one action, then your opponent responds.<br><b>SCENE</b> · Have more Power there, then exhaust a ready character to Claim.<br><b>ENERGY</b> · Starts at 2 and grows each round to 8.<br><b>FOCUS</b> · In multicolor decks, cards that do not share your Lead color cost +1 Energy.<br><b>OVERDRIVE</b> · Once per game, +2 Energy now; your max does not grow next round.</div>';
+ return '<div class="rules"><b>WIN</b> · Claim 5 Memories.<br><b>TURN</b> · Take one action, then your opponent responds.<br><b>SCENE</b> · Have more Power there, then exhaust a ready character to Claim.<br><b>ENERGY</b> · Starts at 2 and grows each round to 8.<br><b>FOCUS</b> · In multicolor decks, off-Lead cards pay Focus: +1 Energy in dual decks, +2 in three-color decks.<br><b>OVERDRIVE</b> · Once per game, +2 Energy now; your max does not grow next round.</div>';
 }
 function lobby(msg){
  return shellTop()+(rulesOpen?rules():"")+
@@ -165,7 +165,7 @@ function poolRow(v,id){
  return '<div class="pool-card '+(c.hybrid?'hybrid':'')+'"><div class="pool-cost">'+c.c+'</div><div><div class="pool-name">'+esc(c.n)+'</div><div class="pool-meta">'+colorDots(cols)+cols.map(x=>colorName[x]).join(" / ")+' · '+esc(c.t)+(c.sig?' · signature':'')+'</div></div><div class="pool-controls"><button class="copy-btn" data-lab-minus="'+id+'" '+(n<=0?'disabled':'')+'>−</button><span class="copy-n">'+n+'</span><button class="copy-btn" data-lab-plus="'+id+'" '+(n>=2?'disabled':'')+'>+</button></div></div>';
 }
 function deckLab(v,msg){
- const primary=v.deckInfo[labLead].element,status=labStatus(v),focus=labColors.length===1?"MONO · full Focus":labColors.length===2?"DUAL · off-Lead +1 Energy · Awaken +1":"TRI · off-Lead +1 Energy · Awaken +2";
+ const primary=v.deckInfo[labLead].element,status=labStatus(v),focus=labColors.length===1?"MONO · full Focus":labColors.length===2?"DUAL · off-Lead +1 Energy · Awaken +1":"TRI · off-Lead +2 Energy · Awaken +2";
  const order=["hana","le","rei","firefly"],allColors=["flame","tide","bloom","veil"];
  const eligible=Object.keys(v.cards).filter(id=>eligibleForLab(v.cards[id]));
  const duos=eligible.filter(id=>v.cards[id].hybrid).sort((a,b)=>v.cards[a].c-v.cards[b].c);
