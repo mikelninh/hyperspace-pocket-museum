@@ -364,7 +364,9 @@ async function startDraft(pair,lead){
  if(busy)return;try{busy=true;errorText="";draftSetupOpen=false;render(await api({op:"draftStart",pair,lead,difficulty:"rival"}))}catch(e){errorText=e.message;draftSetupOpen=true;render(last)}finally{busy=false}
 }
 async function draftPick(id){
- if(busy)return;try{busy=true;errorText="";render(await api({op:"draftPick",cardId:id}))}catch(e){errorText=e.message;render(last)}finally{busy=false}
+ if(busy)return;
+ document.querySelectorAll("[data-draft-pick]").forEach(x=>x.disabled=true);
+ try{busy=true;errorText="";render(await api({op:"draftPick",cardId:id}))}catch(e){errorText=e.message;render(last)}finally{busy=false}
 }
 async function startTutorial(){if(busy)return;try{busy=true;errorText="";clearSelection();render(await api({op:"tutorial"}))}catch(e){errorText=e.message;if(last)render(last)}finally{busy=false}}
 async function shareRoom(){const u=location.href;try{if(navigator.share)await navigator.share({title:"HANA TCG",text:"Play a match with me.",url:u});else if(navigator.clipboard){await navigator.clipboard.writeText(u);errorText="Room link copied.";render(last)}else prompt("Send this room link:",u)}catch{}}
