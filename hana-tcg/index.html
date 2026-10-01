@@ -231,7 +231,7 @@ function lobby(msg){
  '<button class="draft-entry" data-ui="draft-setup"><div class="eyebrow">NEW · v0.12 DUO DRAFT</div><strong>Draft 24 cards vs AI →</strong><span>Choose a color pair + Lead · 6 waves · 8 cards per wave · play immediately</span></button>'+
  '<div class="mode"><button class="mode-main" data-ui="tutorial"><div class="eyebrow">Learn the core game</div><strong>Learn with Hana →</strong><span>Hana vs Le · guided opening hand</span></button>'+
  '<div><div class="eyebrow" style="margin:3px 0 7px">CONSTRUCTED VS COMPUTER</div><div class="mode-row"><button class="btn" data-ui="bot" data-diff="rookie">Rookie</button><button class="btn primary" data-ui="bot" data-diff="rival">Rival</button><button class="btn" data-ui="bot" data-diff="weaver">Weaver</button></div></div></div>'+
- '<div class="rule-strip"><div><b>80</b>Unique cards</div><div><b>24</b>Draft deck</div><div><b>5</b>Memories to win</div></div>'+
+ '<div class="rule-strip"><div><b>80</b>Playable cards</div><div><b>180</b>Binder slots</div><div><b>24</b>Draft deck</div></div>'+
  '<button class="btn ghost" style="width:100%" data-ui="share">Play a friend · share room link</button>'+
  (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
 }
@@ -474,6 +474,10 @@ async function shareRoom(){const u=location.href;try{if(navigator.share)await na
 root.addEventListener("click",async e=>{
  const b=e.target.closest("button");if(!b)return;
  if(b.dataset.ui==="rules"){rulesOpen=!rulesOpen;render(last);return}
+ if(b.dataset.ui==="binder"){binderOpen=!binderOpen;inspectCardId=null;render(last);return}
+ if(b.dataset.ui==="inspect-close"){inspectCardId=null;render(last);return}
+ if(b.dataset.binderPage!==undefined){binderPage=Math.max(0,Math.min(19,Number(b.dataset.binderPage)||0));render(last);return}
+ if(b.dataset.binderCard){inspectCardId=b.dataset.binderCard;render(last);return}
  if(b.dataset.ui==="share"){await shareRoom();return}
  if(b.dataset.ui==="draft-setup"){draftSetupOpen=true;errorText="";render(last);return}
  if(b.dataset.ui==="draft-back"){draftSetupOpen=false;errorText="";render(last);return}
@@ -504,7 +508,9 @@ root.addEventListener("click",async e=>{
  if(b.dataset.deck){await act({type:"selectDeck",deck:b.dataset.deck});return}
  if(b.dataset.scene!==undefined){activeScene=Math.max(0,Math.min(2,Number(b.dataset.scene)||0));render(last);return}
  if(b.dataset.card){
-   const v=last.view,x=v.hands.find(x=>x.uid===b.dataset.card);selectedUnit=null;pendingTarget=null;mode=null;selectedCard=selectedCard?.uid===x.uid?null:x;render(last);revealContext();return;
+   const v=last.view,x=v.hands.find(x=>x.uid===b.dataset.card);if(!x)return;
+   if(selectedCard?.uid===x.uid){inspectCardId=x.cardId;render(last);return}
+   selectedUnit=null;pendingTarget=null;mode=null;selectedCard=x;render(last);revealContext();return;
  }
  if(b.dataset.playCard){
    const a={type:"play",uid:b.dataset.playCard};if(b.dataset.playScene!==undefined)a.scene=Number(b.dataset.playScene);await act(a);return;
