@@ -119,7 +119,7 @@ button:disabled{cursor:default;opacity:.45}
  #root{min-height:100dvh;padding:0 8px}
  .shell-top{height:44px;padding:4px 0}.brand strong{font-size:11px}.version{font-size:8px}.shell-top .btn{min-height:34px;padding:0 9px;font-size:10px}
  .play-shell{height:calc(100dvh - 44px);display:grid;grid-template-rows:minmax(0,1fr) minmax(52px,auto) 170px;gap:5px;overflow:hidden}
- .play-board{min-height:0;overflow:hidden;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
+ .play-board{min-height:0;overflow:hidden;display:flex;flex-direction:column}.play-board>.scene-card{flex:1;min-height:0}
  .play-action{min-height:0;max-height:105px;overflow:auto;overscroll-behavior:contain}
  .play-hand{min-height:0;overflow:hidden;border-top:1px solid #ffffff18;background:linear-gradient(180deg,#0d1018,#090a0f);padding-top:3px}
  .hud{margin:0 0 3px;padding:5px 7px;border-radius:10px}.turnline{margin-bottom:3px}.turnstate{font-size:10px}.round{font-size:8px}.playername{font-size:9px}.player-meta{font-size:8px;margin-top:2px}.pips i{width:6px;height:6px}
