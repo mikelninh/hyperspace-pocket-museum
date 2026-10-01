@@ -154,9 +154,32 @@ const identity={
 function chooseDeck(v,msg){
  const order=["hana","le","rei","firefly"];
  return shellTop()+(rulesOpen?rules():"")+
- '<section class="hero" style="padding-top:16px"><div class="eyebrow">'+(msg.mode==="bot"?"VS "+esc((msg.botDifficulty||"rival").toUpperCase()):"FRIEND MATCH")+'</div><h1>Choose how you want to play.</h1><p>Your opponent choice stays hidden until both decks are locked.</p></section>'+
+ '<section class="hero" style="padding-top:16px"><div class="eyebrow">'+(msg.mode==="bot"?"VS "+esc((msg.botDifficulty||"rival").toUpperCase()):"FRIEND MATCH")+'</div><h1>Choose how you want to play.</h1><p>Use a focused starter, or build your own 1–3 color deck.</p></section>'+
+ '<button class="lab-entry" data-ui="decklab"><div class="eyebrow">NEW · v0.6 DECK LAB</div><strong>Build mono, dual, or tri-color →</strong><span>30 cards · max 2 copies · Hybrid Duos · no colored-mana screw</span></button>'+
  '<div class="deck-list">'+order.map(k=>{const d=v.deckInfo[k],id=identity[k];return '<button class="deck-choice '+d.element+'" data-deck="'+k+'"><div class="eyebrow">'+(d.s1?esc(d.s1)+' · ':'')+esc(d.element.toUpperCase())+'</div><h3>'+esc(d.name)+'</h3><div class="deck-tags">'+id.tags+'</div><div class="deck-copy">'+id.copy+'</div><div class="deck-awaken"><b>30 CARDS · 15 UNIQUE</b><br><b>SIGNATURES</b> · '+esc(id.sig)+'<br><b>AWAKEN</b> · '+esc(d.trigger)+'<br><span>'+esc(d.formText||"")+'</span></div></button>'}).join("")+'</div>'+
  (v.opponentLocked?'<div class="notice"><b>Opponent locked.</b> Their hero is still hidden.</div>':'')+
+ (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
+}
+function poolRow(v,id){
+ const c=v.cards[id],n=labCounts[id]||0,cols=ccolors(c);
+ return '<div class="pool-card '+(c.hybrid?'hybrid':'')+'"><div class="pool-cost">'+c.c+'</div><div><div class="pool-name">'+esc(c.n)+'</div><div class="pool-meta">'+colorDots(cols)+cols.map(x=>colorName[x]).join(" / ")+' · '+esc(c.t)+(c.sig?' · signature':'')+'</div></div><div class="pool-controls"><button class="copy-btn" data-lab-minus="'+id+'" '+(n<=0?'disabled':'')+'>−</button><span class="copy-n">'+n+'</span><button class="copy-btn" data-lab-plus="'+id+'" '+(n>=2?'disabled':'')+'>+</button></div></div>';
+}
+function deckLab(v,msg){
+ const primary=v.deckInfo[labLead].element,status=labStatus(v),focus=labColors.length===1?"MONO · full Focus":labColors.length===2?"DUAL · Awaken +1 step":"TRI · Awaken +2 steps";
+ const order=["hana","le","rei","firefly"],allColors=["flame","tide","bloom","veil"];
+ const eligible=Object.keys(v.cards).filter(id=>eligibleForLab(v.cards[id]));
+ const duos=eligible.filter(id=>v.cards[id].hybrid).sort((a,b)=>v.cards[a].c-v.cards[b].c);
+ const regular=eligible.filter(id=>!v.cards[id].hybrid).sort((a,b)=>{const ca=v.cards[a],cb=v.cards[b];const ia=labColors.indexOf(ca.e),ib=labColors.indexOf(cb.e);return ia-ib||ca.c-cb.c||ca.n.localeCompare(cb.n)});
+ return shellTop()+(rulesOpen?rules():"")+
+ '<div class="lab-head"><div><div class="eyebrow">v0.6 · CONSTRUCTED LAB</div><div class="lab-title">Build your deck.</div></div><button class="btn small ghost" data-ui="decklab-back">Back</button></div>'+
+ '<section class="lab-section"><h3>1 · Choose your Lead</h3><div class="lab-chips">'+order.map(k=>'<button class="lab-chip '+v.deckInfo[k].element+' '+(labLead===k?'on':'')+'" data-lab-lead="'+k+'">'+esc(v.deckInfo[k].lead)+'</button>').join("")+'</div></section>'+
+ '<section class="lab-section"><h3>2 · Choose 1–3 colors</h3><div class="lab-chips">'+allColors.map(x=>'<button class="lab-chip '+x+' '+(labColors.includes(x)?'on ':'')+(x===primary?'locked':'')+'" data-lab-color="'+x+'">'+colorName[x]+'</button>').join("")+'</div>'+
+ '<div class="focus-card"><div><b>'+focus+'</b><span>'+labColors.map(x=>colorName[x]).join(" + ")+'</span></div><div style="text-align:right"><b>'+v.deckInfo[labLead].form+'</b><span>'+esc(v.deckInfo[labLead].trigger)+'</span></div></div></section>'+
+ '<section class="lab-section"><h3>3 · Build 30 cards</h3><div class="lab-meter"><div class="lab-count">'+status.total+'/30</div><div class="lab-legal '+(status.ok?'ok':'bad')+'">'+(status.ok?'LEGAL · READY TO PLAY':esc(status.error))+'<br>'+labColors.map(x=>colorName[x]+' '+status.counts[x]).join(' · ')+'</div></div>'+
+ '<div class="lab-tools"><button class="btn primary" data-ui="lab-auto">Auto-build</button><button class="btn" data-ui="lab-clear">Clear</button></div>'+
+ (duos.length?'<div class="pool-label duo">HYBRID DUOS · pair payoffs</div><div class="pool">'+duos.map(id=>poolRow(v,id)).join("")+'</div>':'')+
+ '<div class="pool-label">CARD POOL · selected colors only</div><div class="pool">'+regular.map(id=>poolRow(v,id)).join("")+'</div></section>'+
+ '<div class="lab-submit"><button class="btn '+(status.ok?'gold':'')+'" data-ui="lab-submit" '+(status.ok?'':'disabled')+'>Play this '+(labColors.length===1?'mono':labColors.length===2?'dual-color':'three-color')+' deck</button></div>'+
  (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
 }
 function hud(v,msg){
@@ -264,7 +287,7 @@ function game(v,msg){
 function render(msg){
  last=msg;const v=msg.view;
  if(!v){root.innerHTML=lobby(msg);return}
- if(v.phase==="choose"){root.innerHTML=chooseDeck(v,msg);return}
+ if(v.phase==="choose"){root.innerHTML=deckLabOpen?deckLab(v,msg):chooseDeck(v,msg);return}
  root.innerHTML=game(v,msg);
 }
 function clearSelection(){selectedCard=null;selectedUnit=null;pendingTarget=null;mode=null}
