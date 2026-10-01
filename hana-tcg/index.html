@@ -77,7 +77,7 @@ let room=new URLSearchParams(location.search).get("room");
 if(!room){room=crypto.randomUUID().replaceAll("-","");history.replaceState(null,"",location.pathname+"?room="+room)}
 const PK="hana-tcg-player";let player=localStorage.getItem(PK);if(!player){player=crypto.randomUUID();localStorage.setItem(PK,player)}
 const root=document.querySelector("#root");
-let last=null,busy=false,rulesOpen=false,activeScene=0,selectedCard=null,selectedUnit=null,pendingTarget=null,mode=null,feedbackSent=false,errorText="";
+let last=null,busy=false,rulesOpen=false,activeScene=0,selectedCard=null,selectedUnit=null,pendingTarget=null,mode=null,feedbackSent=false,errorText="",deckLabOpen=false,labLead="hana",labColors=["flame","tide"],labCounts={};
 
 async function api(body){
  const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({...body,room,player})});
@@ -85,6 +85,40 @@ async function api(body){
 }
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function deck(v,p){const k=v.selectedDeck?.[p];return k?v.deckInfo[k]:null}
+const leadForColor={flame:"hana",tide:"le",bloom:"rei",veil:"firefly"};
+const colorName={flame:"Flame",tide:"Tide",bloom:"Bloom",veil:"Veil"};
+function ccolors(c){return Array.isArray(c.colors)?c.colors:[c.e]}
+function colorDots(colors){return '<span class="color-dots">'+colors.map(x=>'<i class="'+x+'"></i>').join("")+'</span>'}
+function labList(){const out=[];for(const [id,n] of Object.entries(labCounts))for(let i=0;i<n;i++)out.push(id);return out}
+function labColorCounts(v){const out={flame:0,tide:0,bloom:0,veil:0};for(const [id,n] of Object.entries(labCounts)){const c=v.cards[id];if(!c||!n)continue;for(const x of ccolors(c))out[x]+=n}return out}
+function labTotal(){return Object.values(labCounts).reduce((a,n)=>a+n,0)}
+function labStatus(v){
+ const total=labTotal(),primary=v.deckInfo[labLead].element,counts=labColorCounts(v),colors=labColors.slice(),r=v.deckRules;
+ let error="";
+ if(total!==r.size)error="Need exactly "+r.size+" cards";
+ else if(counts[primary]<r.leadMin)error="Lead color needs "+r.leadMin+" matches";
+ else{const min=colors.length===3?r.triSecondaryMin:r.dualSecondaryMin;for(const x of colors)if(x!==primary&&counts[x]<min){error=colorName[x]+" needs "+min+" matches";break}}
+ return {ok:!error,total,counts,error,penalty:Math.max(0,colors.length-1)};
+}
+function eligibleForLab(c){const cs=ccolors(c);return cs.every(x=>labColors.includes(x))}
+function autoBuild(v){
+ labCounts={};const primary=v.deckInfo[labLead].element,others=labColors.filter(x=>x!==primary);
+ const add=(id,n=2)=>{labCounts[id]=Math.min(2,(labCounts[id]||0)+n)};
+ const picks=(key,idxs)=>idxs.forEach(i=>{const id=v.deckInfo[key].cards[i];if(id)add(id,2)});
+ if(labColors.length===1){v.deckInfo[labLead].cards.forEach(id=>add(id,2));return}
+ if(labColors.length===2){
+   picks(labLead,[0,1,2,5,8,11,14]);picks(leadForColor[others[0]],[0,1,2,5,8,11,14]);
+   const h=Object.keys(v.cards).find(id=>{const c=v.cards[id];return c.hybrid&&ccolors(c).every(x=>labColors.includes(x))&&ccolors(c).length===2});if(h)add(h,2);
+ }else{
+   picks(labLead,[0,1,2,8,11,14]);picks(leadForColor[others[0]],[0,1,8]);picks(leadForColor[others[1]],[0,1,8]);
+   Object.keys(v.cards).filter(id=>{const c=v.cards[id];return c.hybrid&&ccolors(c).every(x=>labColors.includes(x))}).forEach(id=>add(id,2));
+ }
+ // normalize down/up to exactly 30 while respecting max copies
+ let ids=Object.keys(labCounts).filter(id=>labCounts[id]>0);
+ while(labTotal()>30){const id=ids.slice().reverse().find(id=>labCounts[id]>1);if(!id)break;labCounts[id]--}
+ const pool=Object.keys(v.cards).filter(id=>eligibleForLab(v.cards[id])&&!v.cards[id].hybrid);
+ let k=0;while(labTotal()<30&&k<200){const id=pool[k%pool.length];if((labCounts[id]||0)<2)labCounts[id]=(labCounts[id]||0)+1;k++}
+}
 function dots(n){return '<span class="pips" aria-label="'+n+' of 5 Memories">'+[0,1,2,3,4].map(i=>'<i class="'+(i<n?'on':'')+'"></i>').join("")+'</span>'}
 function elementGlyph(e){
  if(e==="flame")return '<svg class="glyph" viewBox="0 0 32 32"><path d="M18 3c1 6-4 7-2 12 1-3 4-4 5-7 5 6 6 11 3 16-3 5-12 7-17 1-5-7 1-13 6-18 0 5 2 7 5 8-1-4 1-7 0-12Z" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
