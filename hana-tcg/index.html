@@ -70,7 +70,7 @@ button:disabled{cursor:default;opacity:.45}
 
 /* v0.7 DRAFT */
 .draft-entry{width:100%;border:1px solid #efc66b66;border-radius:18px;padding:16px;background:radial-gradient(circle at 84% 0,#efc66b20,transparent 35%),linear-gradient(145deg,#19171d,#10131a);text-align:left;margin:10px 0}.draft-entry strong{display:block;font-size:21px;margin:14px 0 5px}.draft-entry span{color:var(--muted);font-size:11px}
-.draft-pairs{display:grid;gap:8px;margin:12px 0 24px}.draft-pair{border:1px solid var(--line);border-radius:15px;background:#11141c;padding:12px}.draft-pair h3{font-size:15px;margin:3px 0}.draft-pair-name{font-size:10px;color:var(--gold);font-weight:850;margin:4px 0 9px}.draft-leads{display:grid;grid-template-columns:1fr 1fr;gap:6px}.draft-leads .btn{font-size:11px;padding:0 7px}
+.draft-pairs{display:grid;gap:8px;margin:12px 0 24px}.draft-pair{border:1px solid var(--line);border-radius:15px;background:#11141c;padding:12px}.draft-pair h3{font-size:15px;margin:3px 0}.draft-pair-bio{font-size:10px;line-height:1.35;color:var(--muted);min-height:41px;margin:5px 0 10px}.draft-pair-name{font-size:10px;color:var(--gold);font-weight:850;margin:4px 0 9px}.draft-leads{display:grid;grid-template-columns:1fr 1fr;gap:6px}.draft-leads .btn{font-size:11px;padding:0 7px}
 .draft-top{position:sticky;top:0;z-index:16;background:#090a0ff2;padding:8px 0 6px;backdrop-filter:blur(12px)}.draft-progress{display:flex;justify-content:space-between;align-items:end;gap:8px}.draft-progress strong{font-size:21px}.draft-progress span{font-size:10px;color:var(--muted)}
 .draft-bar{height:4px;border-radius:99px;background:#202531;overflow:hidden;margin:7px 0}.draft-bar i{display:block;height:100%;background:var(--gold)}
 .draft-guide{font-size:11px;color:var(--muted);margin:7px 0 10px}.draft-guide b{color:var(--text)}
@@ -161,19 +161,19 @@ function lobby(msg){
  (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
 }
 const draftPairs=[
- {pair:["flame","tide"],name:"Nhi — Motion Composer",leads:["hana","le"]},
- {pair:["flame","bloom"],name:"Mai — Solar Sculptor",leads:["hana","rei"]},
- {pair:["flame","veil"],name:"Khai — Light Thief",leads:["hana","firefly"]},
- {pair:["tide","bloom"],name:"Lan — City Ecologist",leads:["le","rei"]},
- {pair:["tide","veil"],name:"Minh — Signal Cartographer",leads:["le","firefly"]},
- {pair:["bloom","veil"],name:"Vy — Night Biologist",leads:["rei","firefly"]}
+ {pair:["flame","tide"],name:"Nhi — Motion Composer",bio:"Choreographer + sound-installation artist. Turns movement into music.",leads:["hana","le"]},
+ {pair:["flame","bloom"],name:"Mai — Solar Sculptor",bio:"Material artist building public sculpture from reclaimed solar film.",leads:["hana","rei"]},
+ {pair:["flame","veil"],name:"Khai — Light Thief",bio:"Projection artist + street photographer. Steals light back for the city.",leads:["hana","firefly"]},
+ {pair:["tide","bloom"],name:"Lan — City Ecologist",bio:"Urban biodiversity researcher mapping people, heat, plants and insects together.",leads:["le","rei"]},
+ {pair:["tide","veil"],name:"Minh — Signal Cartographer",bio:"Radio + transit systems mapper charting patterns nobody else notices.",leads:["le","firefly"]},
+ {pair:["bloom","veil"],name:"Vy — Night Biologist",bio:"Bioluminescence researcher asking what should — and should not — be made to glow.",leads:["rei","firefly"]}
 ];
 function draftSetup(msg){
  return shellTop()+(rulesOpen?rules():"")+
  '<div class="lab-head"><div><div class="eyebrow">v0.7 · DUO DRAFT</div><div class="lab-title">Choose your pair.</div></div><button class="btn small ghost" data-ui="draft-back">Back</button></div>'+
  '<div class="notice"><b>How it works:</b> choose a color pair and Lead. Each pair has an AFTER HOURS anchor — an original person from Hana’s Saigon. You pick one card, the AI picks one, until both decks have 24 cards.</div>'+
  '<div class="draft-pairs">'+draftPairs.map(d=>'<section class="draft-pair">'+
- '<div>'+colorDots(d.pair)+'</div><h3>'+d.pair.map(x=>colorName[x]).join(" + ")+'</h3><div class="draft-pair-name">'+esc(d.name)+'</div>'+
+ '<div>'+colorDots(d.pair)+'</div><h3>'+d.pair.map(x=>colorName[x]).join(" + ")+'</h3><div class="draft-pair-name">'+esc(d.name)+'</div><div class="draft-pair-bio">'+esc(d.bio)+'</div>'+
  '<div class="draft-leads">'+d.leads.map(k=>'<button class="btn" data-draft-start="'+d.pair.join("|")+'" data-draft-lead="'+k+'">Lead · '+esc({hana:"Hana",le:"Le",rei:"Rei",firefly:"Firefly"}[k])+'</button>').join("")+'</div></section>').join("")+'</div>'+
  (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
 }
