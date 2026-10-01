@@ -78,6 +78,7 @@ button:disabled{cursor:default;opacity:.45}
 .draft-cost{position:absolute;right:7px;top:7px;width:28px;height:28px;border:1px solid #ffffff2b;border-radius:8px;display:grid;place-items:center;font-weight:950;background:#090a0fcc}.draft-rarity{font-size:8px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:27px}.draft-name{font-weight:900;font-size:12px;line-height:1.1;padding-right:25px}.draft-meta{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:5px 0}.draft-text{font-size:9px;color:#d2d5de;line-height:1.3}.draft-role{position:absolute;left:8px;bottom:7px;font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
 .draft-picks{margin:12px 0;border-top:1px solid var(--line);padding-top:10px}.draft-summary{display:flex;gap:8px;align-items:center;justify-content:space-between}.draft-summary b{font-size:11px}.draft-colors{font-size:9px;color:var(--muted)}.draft-recent{display:flex;gap:5px;overflow:auto;margin-top:7px;scrollbar-width:none}.draft-recent span{flex:0 0 auto;border:1px solid var(--line);border-radius:99px;padding:5px 7px;font-size:9px;color:var(--muted)}
 @media(max-width:350px){.draft-offer{grid-template-columns:1fr}.draft-card{min-height:132px}.draft-leads{grid-template-columns:1fr}}
+.card-art.has-art{display:block}.card-art-img{width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block}.card-art.has-art:after{background:linear-gradient(0deg,#08090db8,transparent 75%);height:24px}.draft-art{height:92px;margin:-9px -9px 8px;overflow:hidden;border-bottom:1px solid #ffffff1c;background:#0a0b10}.draft-art-img{width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block}.draft-card.hybrid:has(.draft-art){min-height:235px}.pool-card.hybrid .pool-cost{border-color:#efc66b66;color:var(--gold)}
 </style>
 </head>
 <body>
@@ -99,6 +100,15 @@ function deck(v,p){const k=v.selectedDeck?.[p];return k?v.deckInfo[k]:null}
 const leadForColor={flame:"hana",tide:"le",bloom:"rei",veil:"firefly"};
 const colorName={flame:"Flame",tide:"Tide",bloom:"Bloom",veil:"Veil"};
 function ccolors(c){return Array.isArray(c.colors)?c.colors:[c.e]}
+const CARD_ART={
+ h_ft:"art/blue-hour-promise.webp",
+ h_fb:"art/sunrise-overdrive.webp",
+ h_fv:"art/maskflare-ambush.webp",
+ h_tb:"art/garden-circuit.webp",
+ h_tv:"art/silent-reroute.webp",
+ h_bv:"art/midnight-prototype.webp"
+};
+function artImg(id,cls=""){return CARD_ART[id]?'<img class="'+cls+'" src="'+CARD_ART[id]+'" alt="" loading="lazy" decoding="async">':""}
 function colorDots(colors){return '<span class="color-dots">'+colors.map(x=>'<i class="'+x+'"></i>').join("")+'</span>'}
 function labList(){const out=[];for(const [id,n] of Object.entries(labCounts))for(let i=0;i<n;i++)out.push(id);return out}
 function labColorCounts(v){const out={flame:0,tide:0,bloom:0,veil:0};for(const [id,n] of Object.entries(labCounts)){const c=v.cards[id];if(!c||!n)continue;for(const x of ccolors(c))out[x]+=n}return out}
@@ -194,6 +204,7 @@ function pickColorCounts(d){
 function draftCardTile(d,id){
  const c=d.cards[id],cols=ccolors(c),r=rarityOf(c);
  return '<button class="draft-card '+c.e+' '+(c.hybrid?'hybrid':'')+'" data-draft-pick="'+id+'">'+
+ (CARD_ART[id]?'<div class="draft-art">'+artImg(id,"draft-art-img")+'</div>':'')+
  '<div class="draft-cost">'+c.c+'</div><div class="draft-rarity">'+rarityName(r)+(c.hybrid?' · HYBRID':'')+'</div>'+
  '<div class="draft-name">'+esc(c.n)+'</div><div class="draft-meta">'+colorDots(cols)+cols.map(x=>colorName[x]).join(" / ")+' · '+esc(c.t)+'</div>'+
  '<div class="draft-text">'+esc(c.x)+'</div><div class="draft-role">'+esc(draftRole(c))+'</div></button>';
@@ -282,7 +293,7 @@ function scene(v){
 function cardHTML(v,x){
  const c=v.cards[x.cardId],price=v.playCosts[x.uid]??c.c,afford=price<=v.energy[v.you];
  return '<button class="card '+c.e+' '+(c.hybrid?'hybrid ':'')+(c.sig?'signature ':'')+(c.finisher?'finisher ':'')+(afford?'':'disabled ')+(selectedCard?.uid===x.uid?'selected':'')+'" data-card="'+esc(x.uid)+'" '+(!v.yourTurn?'disabled':'')+'>'+
- '<div class="card-art">'+elementGlyph(c.e)+(c.finisher?'<span class="playtag">FINISHER</span>':afford?'<span class="playtag">PLAY</span>':'')+'</div><div class="card-cost">'+price+'</div><div class="card-body"><div class="card-name">'+esc(c.n)+'</div><div class="card-type">'+(c.s1?esc(c.s1)+' · ':'')+(c.hybrid?'DUO · '+ccolors(c).map(x=>esc(colorName[x])).join(' / '):esc(c.e))+' · '+esc(c.t)+(c.sig?' · SIGNATURE':'')+'</div><div class="card-text">'+esc(c.x)+'</div></div>'+
+ '<div class="card-art '+(CARD_ART[x.cardId]?'has-art':'')+'">'+(CARD_ART[x.cardId]?artImg(x.cardId,"card-art-img"):elementGlyph(c.e))+(c.finisher?'<span class="playtag">FINISHER</span>':afford?'<span class="playtag">PLAY</span>':'')+'</div><div class="card-cost">'+price+'</div><div class="card-body"><div class="card-name">'+esc(c.n)+'</div><div class="card-type">'+(c.s1?esc(c.s1)+' · ':'')+(c.hybrid?'DUO · '+ccolors(c).map(x=>esc(colorName[x])).join(' / '):esc(c.e))+' · '+esc(c.t)+(c.sig?' · SIGNATURE':'')+'</div><div class="card-text">'+esc(c.x)+'</div></div>'+
  '<div class="card-foot">'+(c.t==="character"?'<span>P '+c.p+'</span><span>HP '+c.h+'</span>':'<span>'+c.t.toUpperCase()+'</span><span>'+price+' E</span>')+'</div></button>';
 }
 function context(v){
