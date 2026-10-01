@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090a0f">
-<title>HANA TCG — Playtest v0.5</title>
-<meta name="description" content="HANA TCG Starter Depth playtest. 30-card decks, signature cards, real finishers.">
+<title>HANA TCG — Playtest v0.6</title>
+<meta name="description" content="HANA TCG Deck Lab. Build mono, dual, or three-color 30-card decks.">
 <style>
 :root{
   color-scheme:dark;
@@ -47,6 +47,26 @@ button:disabled{cursor:default;opacity:.45}
 @media(min-width:600px){#root{padding-left:18px;padding-right:18px}.deck-list{grid-template-columns:1fr 1fr}.mode{grid-template-columns:1.3fr .7fr}.mode-row{align-self:stretch;grid-template-columns:1fr}.context-actions{grid-template-columns:repeat(3,1fr)}.context-actions .btn.full{grid-column:auto}.card{flex-basis:138px;height:185px}.card-art{height:62px}.card-cost{top:68px}}
 @media(max-width:350px){#root{padding-left:8px;padding-right:8px}.players{gap:5px}.playername{font-size:10px}.scene-tab{padding:5px}.scene-tab strong{font-size:8px}.context-actions{grid-template-columns:1fr}.context-actions .btn.full{grid-column:auto}.card{flex-basis:118px}.mode-row{grid-template-columns:1fr}.rule-strip{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+/* v0.6 DECK LAB */
+.lab-entry{border:1px solid #ffffff38;border-radius:16px;background:radial-gradient(circle at 90% 0,#5fa9ef25,transparent 35%),radial-gradient(circle at 10% 100%,#ef5a7020,transparent 35%),#11141c;padding:14px;margin:10px 0 14px;text-align:left}
+.lab-entry strong{display:block;font-size:18px;margin:10px 0 4px}.lab-entry span{font-size:11px;color:var(--muted)}
+.lab-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0}.lab-title{font-size:24px;font-weight:950;letter-spacing:-.035em}
+.lab-section{border-top:1px solid var(--line);padding:12px 0}.lab-section h3{font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:var(--muted);margin:0 0 8px}
+.lab-chips{display:flex;gap:6px;overflow:auto;scrollbar-width:none}.lab-chips::-webkit-scrollbar{display:none}
+.lab-chip{min-height:42px;border:1px solid var(--line);background:#121620;border-radius:11px;padding:0 11px;white-space:nowrap;font-size:11px;font-weight:850}
+.lab-chip.on{border-color:#ffffff66;background:#1b202c}.lab-chip.locked:after{content:" · LEAD";font-size:8px;color:var(--gold)}
+.lab-chip.flame.on{box-shadow:inset 0 -2px var(--flame)}.lab-chip.tide.on{box-shadow:inset 0 -2px var(--tide)}.lab-chip.bloom.on{box-shadow:inset 0 -2px var(--bloom)}.lab-chip.veil.on{box-shadow:inset 0 -2px var(--veil)}
+.focus-card{border:1px solid var(--line);border-radius:13px;background:#10131a;padding:10px 11px;margin:8px 0;display:flex;justify-content:space-between;gap:10px}.focus-card b{display:block;font-size:12px}.focus-card span{font-size:10px;color:var(--muted)}
+.lab-meter{display:flex;align-items:center;justify-content:space-between;gap:9px;border:1px solid var(--line);border-radius:13px;padding:10px;margin:8px 0;background:#11141c}.lab-count{font-size:20px;font-weight:950}.lab-legal{font-size:10px;color:var(--muted);text-align:right}.lab-legal.ok{color:#82d8aa}.lab-legal.bad{color:#ed8794}
+.lab-tools{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0}.lab-tools .btn{font-size:11px}
+.pool-label{font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin:13px 0 6px}.pool-label.duo{color:var(--gold)}
+.pool{display:grid;gap:5px}.pool-card{display:grid;grid-template-columns:34px 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);border-radius:11px;background:#11141c;padding:7px}.pool-card.hybrid{border-color:#efc66b55;background:linear-gradient(110deg,#17141c,#111820)}
+.pool-cost{width:32px;height:32px;border-radius:9px;border:1px solid #ffffff26;display:grid;place-items:center;font-weight:950}.pool-name{font-size:11px;font-weight:850;line-height:1.15}.pool-meta{font-size:8px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-top:3px}.pool-controls{display:flex;align-items:center;gap:4px}.copy-btn{width:34px;height:34px;border:1px solid var(--line);background:#181c27;border-radius:9px;font-weight:950}.copy-n{width:18px;text-align:center;font-weight:900}
+.color-dots{display:inline-flex;gap:3px;margin-right:4px}.color-dots i{width:7px;height:7px;border-radius:50%;display:block}.color-dots .flame{background:var(--flame)}.color-dots .tide{background:var(--tide)}.color-dots .bloom{background:var(--bloom)}.color-dots .veil{background:var(--veil)}
+.lab-submit{position:sticky;bottom:8px;z-index:20;margin:12px 0;background:#090a0fdc;padding:7px 0;backdrop-filter:blur(10px)}.lab-submit .btn{width:100%;min-height:50px}
+.card.hybrid{border-color:#efc66b78;box-shadow:inset 0 0 0 1px #ffffff0d}.card.hybrid .playtag{color:var(--gold)}
+.deck-colors{display:inline-flex;gap:3px;vertical-align:middle}.deck-colors i{width:7px;height:7px;border-radius:50%}
 </style>
 </head>
 <body>
@@ -77,7 +97,7 @@ function scenePower(v,p,si){return v.scenes[si].units.filter(u=>u.owner===p).red
 function canClaim(v,si){return v.yourTurn&&!v.claimed[v.you]&&scenePower(v,v.you,si)>scenePower(v,v.opponent,si)&&v.scenes[si].units.some(u=>u.owner===v.you&&u.ready)}
 function locOf(v,uid){for(let si=0;si<3;si++){const u=v.scenes[si].units.find(x=>x.uid===uid);if(u)return {si,u}}return null}
 function shellTop(){
- return '<div class="shell-top"><div class="brand"><div class="brand-mark"></div><strong>HANA TCG</strong><span class="version">v0.5</span></div><button class="btn small ghost" data-ui="rules">Rules</button></div>';
+ return '<div class="shell-top"><div class="brand"><div class="brand-mark"></div><strong>HANA TCG</strong><span class="version">v0.6</span></div><button class="btn small ghost" data-ui="rules">Rules</button></div>';
 }
 function rules(){
  return '<div class="rules"><b>WIN</b> · Claim 5 Memories.<br><b>TURN</b> · Take one action, then your opponent responds.<br><b>SCENE</b> · Have more Power there, then exhaust a ready character to Claim.<br><b>ENERGY</b> · Starts at 2 and grows each round to 8.<br><b>OVERDRIVE</b> · Once per game, +2 Energy now; your max does not grow next round.</div>';
@@ -193,7 +213,7 @@ function tools(v){
  return '<div class="turn-tools"><button class="btn" data-action="overdrive" '+(!v.yourTurn||v.overdriveUsed[v.you]?'disabled':'')+'>Overdrive +2</button><button class="btn" data-action="pass" '+(!v.yourTurn?'disabled':'')+'>Pass</button></div>';
 }
 function feedback(v,msg){
- if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.5 needs.</div>';
+ if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.6 needs.</div>';
  return '<div class="feedback"><div class="eyebrow">30-second playtest</div><div class="feedback-grid"><select id="fun"><option value="">Fun 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="clear"><option value="">Clarity 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="again"><option value="">Play again?</option><option value="yes">Yes</option><option value="no">No</option></select><button class="btn primary" data-ui="feedback">Send feedback</button></div></div>';
 }
 function result(v,msg){
