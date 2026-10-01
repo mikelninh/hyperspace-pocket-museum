@@ -126,7 +126,7 @@ function elementGlyph(e){
  if(e==="bloom")return '<svg class="glyph" viewBox="0 0 32 32"><path d="M16 16C7 15 5 8 7 4c6 0 9 4 9 12Zm0 0c9-1 11-8 9-12-6 0-9 4-9 12Zm0 0c-6 3-7 9-5 12 4 0 6-4 5-12Zm0 0c6 3 7 9 5 12-4 0-6-4-5-12Z" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
  return '<svg class="glyph" viewBox="0 0 32 32"><path d="M22 5c-9 2-12 14-4 20 3 2 7 2 10 1-4 4-11 5-16 1C3 21 5 8 14 4c3-1 6-1 8 1Z" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
 }
-function cardPower(v,u,si){const c=v.cards[u.cardId];let p=c.p||0;(u.items||[]).forEach(it=>p+=v.cards[it.cardId].pb||0);if(si===0&&c.c<=2)p++;if(si===2&&v.form[u.owner])p++;return p}
+function cardPower(v,u,si){const c=v.cards[u.cardId];let p=(c.p||0)+(u.tempPower||0);(u.items||[]).forEach(it=>{const ic=v.cards[it.cardId];p+=ic.pb||0;if(it.cardId==="v6"&&v.scenes[si].units.some(x=>x.owner!==u.owner&&!x.ready))p+=2});if(c.exhaustAura&&v.scenes[si].units.some(x=>x.owner!==u.owner&&!x.ready))p+=c.exhaustAura;if(c.itemPower&&(u.items||[]).length)p+=c.itemPower;if(si===0&&c.c<=2)p++;if(si===2&&v.form[u.owner])p++;return p}
 function scenePower(v,p,si){return v.scenes[si].units.filter(u=>u.owner===p).reduce((a,u)=>a+cardPower(v,u,si),0)}
 function canClaim(v,si){return v.yourTurn&&!v.claimed[v.you]&&scenePower(v,v.you,si)>scenePower(v,v.opponent,si)&&v.scenes[si].units.some(u=>u.owner===v.you&&u.ready)}
 function locOf(v,uid){for(let si=0;si<3;si++){const u=v.scenes[si].units.find(x=>x.uid===uid);if(u)return {si,u}}return null}
@@ -186,7 +186,7 @@ function hud(v,msg){
  const yd=deck(v,v.you),od=deck(v,v.opponent),your= v.yourTurn?"YOUR MOVE":(v.opponent==="BOT"?"COMPUTER MOVE":"OPPONENT MOVE");
  const ybase=yd?(v.form[v.you]?yd.form:yd.lead):"You",obase=od?(v.form[v.opponent]?od.form:od.lead):"Opponent",yname=(v.form[v.you]?"AWAKENED · ":"")+ybase,oname=v.opponent==="BOT"?(od?"Computer · "+(v.form[v.opponent]?"AWAKENED · ":"")+obase:"Computer"):((v.form[v.opponent]?"AWAKENED · ":"")+obase);
  return '<section class="hud"><div class="turnline"><div class="turnstate">'+your+'</div><div class="round">Round '+v.round+(msg.botDifficulty?' · '+esc(msg.botDifficulty.toUpperCase()):'')+'</div></div>'+
- '<div class="players"><div class="playerbox"><div class="playername">YOU · '+esc(yname)+'</div><div class="player-meta">'+dots(v.memories[v.you])+'<span>'+v.energy[v.you]+'/'+v.maxEnergy[v.you]+' Energy</span></div></div><div class="versus">VS</div>'+
+ '<div class="players"><div class="playerbox"><div class="playername">YOU · '+esc(yname)+'</div><div class="player-meta">'+dots(v.memories[v.you])+'<span>'+v.energy[v.you]+'/'+v.maxEnergy[v.you]+' Energy</span>'+(v.deckMeta?.[v.you]?colorDots(v.deckMeta[v.you].colors)+'<span>'+(v.deckMeta[v.you].focusPenalty===0?'MONO':v.deckMeta[v.you].focusPenalty===1?'DUAL +1':'TRI +2')+'</span>':'')+'</div></div><div class="versus">VS</div>'+
  '<div class="playerbox right"><div class="playername">'+esc(oname)+'</div><div class="player-meta">'+dots(v.memories[v.opponent])+'<span>'+v.handCount[v.opponent]+' cards</span></div></div></div></section>';
 }
 function sceneTabs(v){
@@ -218,8 +218,8 @@ function scene(v){
 }
 function cardHTML(v,x){
  const c=v.cards[x.cardId],price=v.playCosts[x.uid]??c.c,afford=price<=v.energy[v.you];
- return '<button class="card '+c.e+' '+(c.sig?'signature ':'')+(c.finisher?'finisher ':'')+(afford?'':'disabled ')+(selectedCard?.uid===x.uid?'selected':'')+'" data-card="'+esc(x.uid)+'" '+(!v.yourTurn?'disabled':'')+'>'+
- '<div class="card-art">'+elementGlyph(c.e)+(c.finisher?'<span class="playtag">FINISHER</span>':afford?'<span class="playtag">PLAY</span>':'')+'</div><div class="card-cost">'+price+'</div><div class="card-body"><div class="card-name">'+esc(c.n)+'</div><div class="card-type">'+(c.s1?esc(c.s1)+' · ':'')+esc(c.e)+' · '+esc(c.t)+(c.sig?' · SIGNATURE':'')+'</div><div class="card-text">'+esc(c.x)+'</div></div>'+
+ return '<button class="card '+c.e+' '+(c.hybrid?'hybrid ':'')+(c.sig?'signature ':'')+(c.finisher?'finisher ':'')+(afford?'':'disabled ')+(selectedCard?.uid===x.uid?'selected':'')+'" data-card="'+esc(x.uid)+'" '+(!v.yourTurn?'disabled':'')+'>
+ '<div class="card-art">'+elementGlyph(c.e)+(c.finisher?'<span class="playtag">FINISHER</span>':afford?'<span class="playtag">PLAY</span>':'')+'</div><div class="card-cost">'+price+'</div><div class="card-body"><div class="card-name">'+esc(c.n)+'</div><div class="card-type">'+(c.s1?esc(c.s1)+' · ':'')+(c.hybrid?'DUO · '+ccolors(c).map(x=>esc(colorName[x])).join(' / '):esc(c.e))+' · '+esc(c.t)+(c.sig?' · SIGNATURE':'')+'</div><div class="card-text">'+esc(c.x)+'</div></div>'+
  '<div class="card-foot">'+(c.t==="character"?'<span>P '+c.p+'</span><span>HP '+c.h+'</span>':'<span>'+c.t.toUpperCase()+'</span><span>'+price+' E</span>')+'</div></button>';
 }
 function context(v){
