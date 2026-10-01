@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090a0f">
-<title>HANA TCG — Playtest v0.7</title>
-<meta name="description" content="HANA TCG Draft / Design Alpha. Draft against AI from an 80-card pool.">
+<title>HANA TCG — Playtest v0.12</title>
+<meta name="description" content="HANA TCG v0.12 vertical slice: mobile table, flavor text, Binder and Collection alpha.">
 <style>
 :root{
   color-scheme:dark;
@@ -48,7 +48,7 @@ button:disabled{cursor:default;opacity:.45}
 @media(max-width:350px){#root{padding-left:8px;padding-right:8px}.players{gap:5px}.playername{font-size:10px}.scene-tab{padding:5px}.scene-tab strong{font-size:8px}.context-actions{grid-template-columns:1fr}.context-actions .btn.full{grid-column:auto}.card{flex-basis:118px}.mode-row{grid-template-columns:1fr}.rule-strip{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
-/* v0.7 DECK LAB */
+/* v0.12 DECK LAB */
 .lab-entry{border:1px solid #ffffff38;border-radius:16px;background:radial-gradient(circle at 90% 0,#5fa9ef25,transparent 35%),radial-gradient(circle at 10% 100%,#ef5a7020,transparent 35%),#11141c;padding:14px;margin:10px 0 14px;text-align:left}
 .lab-entry strong{display:block;font-size:18px;margin:10px 0 4px}.lab-entry span{font-size:11px;color:var(--muted)}
 .lab-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0}.lab-title{font-size:24px;font-weight:950;letter-spacing:-.035em}
@@ -68,7 +68,7 @@ button:disabled{cursor:default;opacity:.45}
 .card.hybrid{border-color:#efc66b78;box-shadow:inset 0 0 0 1px #ffffff0d}.card.hybrid .playtag{color:var(--gold)}
 .deck-colors{display:inline-flex;gap:3px;vertical-align:middle}.deck-colors i{width:7px;height:7px;border-radius:50%}
 
-/* v0.7 DRAFT */
+/* v0.12 DRAFT */
 .draft-entry{width:100%;border:1px solid #efc66b66;border-radius:18px;padding:16px;background:radial-gradient(circle at 84% 0,#efc66b20,transparent 35%),linear-gradient(145deg,#19171d,#10131a);text-align:left;margin:10px 0}.draft-entry strong{display:block;font-size:21px;margin:14px 0 5px}.draft-entry span{color:var(--muted);font-size:11px}
 .draft-pairs{display:grid;gap:8px;margin:12px 0 24px}.draft-pair{border:1px solid var(--line);border-radius:15px;background:#11141c;padding:12px}.draft-pair h3{font-size:15px;margin:3px 0}.draft-pair-bio{font-size:10px;line-height:1.35;color:var(--muted);min-height:41px;margin:5px 0 10px}.draft-pair-name{font-size:10px;color:var(--gold);font-weight:850;margin:4px 0 9px}.draft-leads{display:grid;grid-template-columns:1fr 1fr;gap:6px}.draft-leads .btn{font-size:11px;padding:0 7px}
 .draft-top{position:sticky;top:0;z-index:16;background:#090a0ff2;padding:8px 0 6px;backdrop-filter:blur(12px)}.draft-progress{display:flex;justify-content:space-between;align-items:end;gap:8px}.draft-progress strong{font-size:21px}.draft-progress span{font-size:10px;color:var(--muted)}
@@ -89,7 +89,7 @@ let room=new URLSearchParams(location.search).get("room");
 if(!room){room=crypto.randomUUID().replaceAll("-","");history.replaceState(null,"",location.pathname+"?room="+room)}
 const PK="hana-tcg-player";let player=localStorage.getItem(PK);if(!player){player=crypto.randomUUID();localStorage.setItem(PK,player)}
 const root=document.querySelector("#root");
-let last=null,busy=false,rulesOpen=false,activeScene=0,selectedCard=null,selectedUnit=null,pendingTarget=null,mode=null,feedbackSent=false,errorText="",deckLabOpen=false,draftSetupOpen=false,labLead="hana",labColors=["flame","tide"],labCounts={};
+let last=null,busy=false,rulesOpen=false,activeScene=0,selectedCard=null,selectedUnit=null,pendingTarget=null,mode=null,feedbackSent=false,errorText="",deckLabOpen=false,draftSetupOpen=false,binderOpen=false,binderPage=0,inspectCardId=null,labLead="hana",labColors=["flame","tide"],labCounts={};
 
 async function api(body){
  const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({...body,room,player})});
@@ -100,6 +100,22 @@ function deck(v,p){const k=v.selectedDeck?.[p];return k?v.deckInfo[k]:null}
 const leadForColor={flame:"hana",tide:"le",bloom:"rei",veil:"firefly"};
 const colorName={flame:"Flame",tide:"Tide",bloom:"Bloom",veil:"Veil"};
 function ccolors(c){return Array.isArray(c.colors)?c.colors:[c.e]}
+const COLLECTION_KEY="hana-v012-collection";
+function loadCollection(){try{return JSON.parse(localStorage.getItem(COLLECTION_KEY)||'{"seen":[]}')}catch{return {seen:[]}}}
+function saveCollection(c){localStorage.setItem(COLLECTION_KEY,JSON.stringify(c))}
+function discover(ids){const c=loadCollection(),s=new Set(c.seen||[]);let changed=false;for(const id of ids||[])if(id&&!s.has(id)){s.add(id);changed=true}if(changed){c.seen=[...s];saveCollection(c)}return c}
+function discoverFromMessage(msg){
+ const ids=[];const v=msg?.view;
+ if(v){for(const x of v.hands||[])ids.push(x.cardId);for(const sc of v.scenes||[])for(const u of sc.units||[]){ids.push(u.cardId);for(const it of u.items||[])ids.push(it.cardId)}}
+ if(msg?.draft){ids.push(...(msg.draft.playerPicks||[]),...(msg.draft.offer||[]))}
+ return discover(ids)
+}
+function vhash(s){let h=2166136261>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0}return h>>>0}
+function initials(name){return String(name||"").split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join("").toUpperCase()}
+function conceptArt(id,c,mini=false){
+ const h=vhash(id),a=h%180,b=(h>>>8)%100,d=(h>>>16)%100,mark=initials(c.n);
+ return '<div class="concept-art '+c.e+' '+(mini?'mini':'')+'" style="--a:'+a+'deg;--x:'+b+'%;--y:'+d+'%"><span>'+esc(mark)+'</span><i></i><b></b></div>'
+}
 const CARD_ART={};
 function artImg(id,cls=""){return CARD_ART[id]?'<img class="'+cls+'" src="'+CARD_ART[id]+'" alt="" loading="lazy" decoding="async">':""}
 function colorDots(colors){return '<span class="color-dots">'+colors.map(x=>'<i class="'+x+'"></i>').join("")+'</span>'}
@@ -145,15 +161,15 @@ function scenePower(v,p,si){return v.scenes[si].units.filter(u=>u.owner===p).red
 function canClaim(v,si){return v.yourTurn&&!v.claimed[v.you]&&scenePower(v,v.you,si)>scenePower(v,v.opponent,si)&&v.scenes[si].units.some(u=>u.owner===v.you&&u.ready)}
 function locOf(v,uid){for(let si=0;si<3;si++){const u=v.scenes[si].units.find(x=>x.uid===uid);if(u)return {si,u}}return null}
 function shellTop(){
- return '<div class="shell-top"><div class="brand"><div class="brand-mark"></div><strong>HANA TCG</strong><span class="version">v0.7</span></div><button class="btn small ghost" data-ui="rules">Rules</button></div>';
+ return '<div class="shell-top"><div class="brand"><div class="brand-mark"></div><strong>HANA TCG</strong><span class="version">v0.12</span></div><div class="top-actions"><button class="btn small ghost" data-ui="binder">Binder</button><button class="btn small ghost" data-ui="rules">Rules</button></div></div>';
 }
 function rules(){
  return '<div class="rules"><b>WIN</b> · Claim 5 Memories.<br><b>TURN</b> · Take one action, then your opponent responds.<br><b>SCENE</b> · Have more Power there, then exhaust a ready character to Claim.<br><b>ENERGY</b> · Starts at 2 and grows each round to 8.<br><b>FOCUS</b> · In multicolor decks, off-Lead cards pay Focus: +1 Energy in dual decks, +2 in three-color decks.<br><b>OVERDRIVE</b> · Once per game, +2 Energy now; your max does not grow next round.</div>';
 }
 function lobby(msg){
  return shellTop()+(rulesOpen?rules():"")+
- '<section class="hero"><div class="eyebrow">DESIGN ALPHA · 80 CARDS</div><h1>Draft the city.<br>Then fight for it.</h1><p>Hana’s world now includes AFTER HOURS — original artists, scientists and makers who anchor every two-color pair.</p></section>'+
- '<button class="draft-entry" data-ui="draft-setup"><div class="eyebrow">NEW · v0.7 DUO DRAFT</div><strong>Draft 24 cards vs AI →</strong><span>Choose a color pair + Lead · 6 waves · 8 cards per wave · play immediately</span></button>'+
+ '<section class="hero"><div class="eyebrow">v0.12 · VERTICAL SLICE</div><h1>Play it.<br>Collect the story.</h1><p>80 playable cards now carry flavor text inside a 180-card Season 1 Binder. Mobile play is being treated as the primary table.</p></section>'+
+ '<button class="draft-entry" data-ui="draft-setup"><div class="eyebrow">NEW · v0.12 DUO DRAFT</div><strong>Draft 24 cards vs AI →</strong><span>Choose a color pair + Lead · 6 waves · 8 cards per wave · play immediately</span></button>'+
  '<div class="mode"><button class="mode-main" data-ui="tutorial"><div class="eyebrow">Learn the core game</div><strong>Learn with Hana →</strong><span>Hana vs Le · guided opening hand</span></button>'+
  '<div><div class="eyebrow" style="margin:3px 0 7px">CONSTRUCTED VS COMPUTER</div><div class="mode-row"><button class="btn" data-ui="bot" data-diff="rookie">Rookie</button><button class="btn primary" data-ui="bot" data-diff="rival">Rival</button><button class="btn" data-ui="bot" data-diff="weaver">Weaver</button></div></div></div>'+
  '<div class="rule-strip"><div><b>80</b>Unique cards</div><div><b>24</b>Draft deck</div><div><b>5</b>Memories to win</div></div>'+
@@ -170,7 +186,7 @@ const draftPairs=[
 ];
 function draftSetup(msg){
  return shellTop()+(rulesOpen?rules():"")+
- '<div class="lab-head"><div><div class="eyebrow">v0.7 · DUO DRAFT</div><div class="lab-title">Choose your pair.</div></div><button class="btn small ghost" data-ui="draft-back">Back</button></div>'+
+ '<div class="lab-head"><div><div class="eyebrow">v0.12 · DUO DRAFT</div><div class="lab-title">Choose your pair.</div></div><button class="btn small ghost" data-ui="draft-back">Back</button></div>'+
  '<div class="notice"><b>How it works:</b> choose a color pair and Lead. Each pair has an AFTER HOURS anchor — an original person from Hana’s Saigon. You pick one card, the AI picks one, until both decks have 24 cards.</div>'+
  '<div class="draft-pairs">'+draftPairs.map(d=>'<section class="draft-pair">'+
  '<div>'+colorDots(d.pair)+'</div><h3>'+d.pair.map(x=>colorName[x]).join(" + ")+'</h3><div class="draft-pair-name">'+esc(d.name)+'</div><div class="draft-pair-bio">'+esc(d.bio)+'</div>'+
@@ -222,7 +238,7 @@ function chooseDeck(v,msg){
  const order=["hana","le","rei","firefly"];
  return shellTop()+(rulesOpen?rules():"")+
  '<section class="hero" style="padding-top:16px"><div class="eyebrow">'+(msg.mode==="bot"?"VS "+esc((msg.botDifficulty||"rival").toUpperCase()):"FRIEND MATCH")+'</div><h1>Choose how you want to play.</h1><p>Use a focused starter, or build your own 1–3 color deck.</p></section>'+
- '<button class="lab-entry" data-ui="decklab"><div class="eyebrow">NEW · v0.7 DECK LAB</div><strong>Build mono, dual, or tri-color →</strong><span>30 cards · max 2 copies · AFTER HOURS pair cards · no colored-mana screw</span></button>'+
+ '<button class="lab-entry" data-ui="decklab"><div class="eyebrow">NEW · v0.12 DECK LAB</div><strong>Build mono, dual, or tri-color →</strong><span>30 cards · max 2 copies · AFTER HOURS pair cards · no colored-mana screw</span></button>'+
  '<div class="deck-list">'+order.map(k=>{const d=v.deckInfo[k],id=identity[k];return '<button class="deck-choice '+d.element+'" data-deck="'+k+'"><div class="eyebrow">'+(d.s1?esc(d.s1)+' · ':'')+esc(d.element.toUpperCase())+'</div><h3>'+esc(d.name)+'</h3><div class="deck-tags">'+id.tags+'</div><div class="deck-copy">'+id.copy+'</div><div class="deck-awaken"><b>30 CARDS · 15 UNIQUE</b><br><b>SIGNATURES</b> · '+esc(id.sig)+'<br><b>AWAKEN</b> · '+esc(d.trigger)+'<br><span>'+esc(d.formText||"")+'</span></div></button>'}).join("")+'</div>'+
  (v.opponentLocked?'<div class="notice"><b>Opponent locked.</b> Their hero is still hidden.</div>':'')+
  (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
@@ -238,7 +254,7 @@ function deckLab(v,msg){
  const duos=eligible.filter(id=>v.cards[id].hybrid).sort((a,b)=>v.cards[a].c-v.cards[b].c);
  const regular=eligible.filter(id=>!v.cards[id].hybrid).sort((a,b)=>{const ca=v.cards[a],cb=v.cards[b];const ia=labColors.indexOf(ca.e),ib=labColors.indexOf(cb.e);return ia-ib||ca.c-cb.c||ca.n.localeCompare(cb.n)});
  return shellTop()+(rulesOpen?rules():"")+
- '<div class="lab-head"><div><div class="eyebrow">v0.7 · CONSTRUCTED LAB</div><div class="lab-title">Build your deck.</div></div><button class="btn small ghost" data-ui="decklab-back">Back</button></div>'+
+ '<div class="lab-head"><div><div class="eyebrow">v0.12 · CONSTRUCTED LAB</div><div class="lab-title">Build your deck.</div></div><button class="btn small ghost" data-ui="decklab-back">Back</button></div>'+
  '<section class="lab-section"><h3>1 · Choose your Lead</h3><div class="lab-chips">'+order.map(k=>'<button class="lab-chip '+v.deckInfo[k].element+' '+(labLead===k?'on':'')+'" data-lab-lead="'+k+'">'+esc(v.deckInfo[k].lead)+'</button>').join("")+'</div></section>'+
  '<section class="lab-section"><h3>2 · Choose 1–3 colors</h3><div class="lab-chips">'+allColors.map(x=>'<button class="lab-chip '+x+' '+(labColors.includes(x)?'on ':'')+(x===primary?'locked':'')+'" data-lab-color="'+x+'">'+colorName[x]+'</button>').join("")+'</div>'+
  '<div class="focus-card"><div><b>'+focus+'</b><span>'+labColors.map(x=>colorName[x]).join(" + ")+'</span></div><div style="text-align:right"><b>'+v.deckInfo[labLead].form+'</b><span>'+esc(v.deckInfo[labLead].trigger)+'</span></div></div></section>'+
@@ -337,7 +353,7 @@ function tools(v){
  return '<div class="turn-tools"><button class="btn" data-action="overdrive" '+(!v.yourTurn||v.overdriveUsed[v.you]?'disabled':'')+'>Overdrive +2</button><button class="btn" data-action="pass" '+(!v.yourTurn?'disabled':'')+'>Pass</button></div>';
 }
 function feedback(v,msg){
- if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.7 needs.</div>';
+ if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.12 needs.</div>';
  return '<div class="feedback"><div class="eyebrow">30-second playtest</div><div class="feedback-grid"><select id="fun"><option value="">Fun 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="clear"><option value="">Clarity 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="again"><option value="">Play again?</option><option value="yes">Yes</option><option value="no">No</option></select><button class="btn primary" data-ui="feedback">Send feedback</button></div></div>';
 }
 function result(v,msg){
