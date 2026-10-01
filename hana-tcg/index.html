@@ -203,8 +203,9 @@ function result(v,msg){
  return '<section class="result"><div class="eyebrow">MATCH '+msg.matchNumber+'</div><h2>'+(win?'Victory':'Match complete')+' · '+score+'</h2><div style="color:var(--muted);font-size:11px">'+v.round+' rounds · '+v.actionCount+' actions'+(msg.firstActionMs?' · first move '+Math.max(1,Math.round(msg.firstActionMs/1000))+'s':'')+'</div><div class="result-grid"><div class="result-stat"><b>'+(m.signatures||0)+'</b><span>Signatures</span></div><div class="result-stat"><b>'+(m.highCost||0)+'</b><span>6+ Energy</span></div><div class="result-stat"><b>'+(m.claims||0)+'</b><span>Claims</span></div><div class="result-stat"><b>'+(m.transforms||0)+'</b><span>Awaken</span></div></div><div style="font-size:10px;color:var(--muted);margin:2px 0 8px">'+(m.finishers||0)+' finisher'+((m.finishers||0)===1?'':'s')+' resolved · '+(m.challenges||0)+' Challenges</div><div class="notice">'+tip+'</div>'+feedback(v,msg)+'<button class="btn primary" style="width:100%;margin-top:10px" data-ui="reset">Play again</button></section>';
 }
 function game(v,msg){
- const s=v.scenes[activeScene],log=v.log?.[0]||"";
- return shellTop()+(rulesOpen?rules():"")+hud(v,msg)+coach(v,msg)+sceneTabs(v)+scene(v)+context(v)+hand(v)+tools(v)+(log?'<div class="last-action">Last action · '+esc(log)+'</div>':'')+result(v,msg)+(errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
+ const log=v.log?.[0]||"";
+ if(msg.status==="over")return shellTop()+(rulesOpen?rules():"")+hud(v,msg)+result(v,msg)+sceneTabs(v)+scene(v)+(log?'<div class="last-action">Final action · '+esc(log)+'</div>':'')+(errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
+ return shellTop()+(rulesOpen?rules():"")+hud(v,msg)+coach(v,msg)+sceneTabs(v)+scene(v)+context(v)+hand(v)+tools(v)+(log?'<div class="last-action">Last action · '+esc(log)+'</div>':'')+(errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
 }
 function render(msg){
  last=msg;const v=msg.view;
