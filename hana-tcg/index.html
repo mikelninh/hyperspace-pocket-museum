@@ -218,7 +218,7 @@ function scene(v){
 }
 function cardHTML(v,x){
  const c=v.cards[x.cardId],price=v.playCosts[x.uid]??c.c,afford=price<=v.energy[v.you];
- return '<button class="card '+c.e+' '+(c.hybrid?'hybrid ':'')+(c.sig?'signature ':'')+(c.finisher?'finisher ':'')+(afford?'':'disabled ')+(selectedCard?.uid===x.uid?'selected':'')+'" data-card="'+esc(x.uid)+'" '+(!v.yourTurn?'disabled':'')+'>
+ return '<button class="card '+c.e+' '+(c.hybrid?'hybrid ':'')+(c.sig?'signature ':'')+(c.finisher?'finisher ':'')+(afford?'':'disabled ')+(selectedCard?.uid===x.uid?'selected':'')+'" data-card="'+esc(x.uid)+'" '+(!v.yourTurn?'disabled':'')+'>'+
  '<div class="card-art">'+elementGlyph(c.e)+(c.finisher?'<span class="playtag">FINISHER</span>':afford?'<span class="playtag">PLAY</span>':'')+'</div><div class="card-cost">'+price+'</div><div class="card-body"><div class="card-name">'+esc(c.n)+'</div><div class="card-type">'+(c.s1?esc(c.s1)+' · ':'')+(c.hybrid?'DUO · '+ccolors(c).map(x=>esc(colorName[x])).join(' / '):esc(c.e))+' · '+esc(c.t)+(c.sig?' · SIGNATURE':'')+'</div><div class="card-text">'+esc(c.x)+'</div></div>'+
  '<div class="card-foot">'+(c.t==="character"?'<span>P '+c.p+'</span><span>HP '+c.h+'</span>':'<span>'+c.t.toUpperCase()+'</span><span>'+price+' E</span>')+'</div></button>';
 }
