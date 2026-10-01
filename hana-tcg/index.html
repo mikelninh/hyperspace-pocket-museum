@@ -305,6 +305,25 @@ root.addEventListener("click",async e=>{
  if(b.dataset.ui==="tutorial"){await startTutorial();return}
  if(b.dataset.ui==="bot"){await startBot(b.dataset.diff||"rival");return}
  if(b.dataset.ui==="clear"){clearSelection();render(last);return}
+ if(b.dataset.ui==="decklab"){deckLabOpen=true;if(!Object.keys(labCounts).length)autoBuild(last.view);render(last);return}
+ if(b.dataset.ui==="decklab-back"){deckLabOpen=false;errorText="";render(last);return}
+ if(b.dataset.labLead){labLead=b.dataset.labLead;labColors=[last.view.deckInfo[labLead].element];autoBuild(last.view);errorText="";render(last);return}
+ if(b.dataset.labColor){
+   const primary=last.view.deckInfo[labLead].element,x=b.dataset.labColor;
+   if(x===primary)return;
+   if(labColors.includes(x))labColors=labColors.filter(c=>c!==x);
+   else if(labColors.length<3)labColors.push(x);
+   else{errorText="Maximum 3 colors.";render(last);return}
+   autoBuild(last.view);errorText="";render(last);return
+ }
+ if(b.dataset.ui==="lab-auto"){autoBuild(last.view);errorText="";render(last);return}
+ if(b.dataset.ui==="lab-clear"){labCounts={};errorText="";render(last);return}
+ if(b.dataset.labPlus){const id=b.dataset.labPlus;if(eligibleForLab(last.view.cards[id])&&(labCounts[id]||0)<2)labCounts[id]=(labCounts[id]||0)+1;render(last);return}
+ if(b.dataset.labMinus){const id=b.dataset.labMinus;if((labCounts[id]||0)>0)labCounts[id]--;render(last);return}
+ if(b.dataset.ui==="lab-submit"){
+   const st=labStatus(last.view);if(!st.ok)return;
+   try{busy=true;errorText="";const msg=await api({op:"action",action:{type:"selectCustomDeck",lead:labLead,cards:labList()}});deckLabOpen=false;clearSelection();render(msg)}catch(e){errorText=e.message;render(last)}finally{busy=false}return
+ }
  if(b.dataset.deck){await act({type:"selectDeck",deck:b.dataset.deck});return}
  if(b.dataset.scene!==undefined){activeScene=Math.max(0,Math.min(2,Number(b.dataset.scene)||0));render(last);return}
  if(b.dataset.card){
