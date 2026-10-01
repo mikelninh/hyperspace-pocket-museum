@@ -422,17 +422,38 @@ function result(v,msg){
  const tip=(m.claims||0)<3?"Next match: prioritize Memories over simply building the biggest board.":(m.challenges||0)===0?"Next match: try removing one key blocker with a Challenge.":(m.overdrives||0)===0?"Next match: look for one decisive Overdrive turn.":"You used the full core loop. Try a different hero next.";
  return '<section class="result"><div class="eyebrow">MATCH '+msg.matchNumber+'</div><h2>'+(win?'Victory':'Match complete')+' · '+score+'</h2><div style="color:var(--muted);font-size:11px">'+v.round+' rounds · '+v.actionCount+' actions'+(msg.firstActionMs?' · first move '+Math.max(1,Math.round(msg.firstActionMs/1000))+'s':'')+'</div><div class="result-grid"><div class="result-stat"><b>'+(m.signatures||0)+'</b><span>Signatures</span></div><div class="result-stat"><b>'+(m.highCost||0)+'</b><span>6+ Energy</span></div><div class="result-stat"><b>'+(m.claims||0)+'</b><span>Claims</span></div><div class="result-stat"><b>'+(m.transforms||0)+'</b><span>Awaken</span></div></div><div style="font-size:10px;color:var(--muted);margin:2px 0 8px">'+(m.finishers||0)+' finisher'+((m.finishers||0)===1?'':'s')+' resolved · '+(m.challenges||0)+' Challenges</div><div class="notice">'+tip+'</div>'+feedback(v,msg)+'<button class="btn primary" style="width:100%;margin-top:10px" data-ui="reset">Play again</button></section>';
 }
+function inspectPanel(msg){
+ if(!inspectCardId)return "";
+ const cards=msg?.catalog?.cards||msg?.view?.cards||msg?.draft?.cards||{},c=cards[inspectCardId];if(!c)return "";
+ const entry=(msg?.catalog?.binder||[]).find(x=>x.id===inspectCardId),r=rarityOf(c),stats=c.t==="character"?"P "+c.p+" · HP "+c.h:c.t==="item"?"ITEM":"MOMENT";
+ return '<div class="inspect-backdrop"><article class="inspect-card"><button class="btn small inspect-close" data-ui="inspect-close">Close</button>'+
+ '<div class="inspect-art">'+conceptArt(inspectCardId,c,false)+'</div><div class="inspect-body"><div class="inspect-kicker">'+(entry?entry.s1+" · ":"")+rarityName(r)+' · '+ccolors(c).map(x=>colorName[x]).join(" / ")+' · '+esc(c.t)+'</div>'+
+ '<div class="inspect-title">'+esc(c.n)+'</div><div class="inspect-kicker">'+stats+' · COST '+c.c+'</div><div class="inspect-rule">'+esc(c.x||"")+'</div>'+
+ (c.fl?'<div class="inspect-flavor">“'+esc(c.fl)+'”</div>':'')+'</div></article></div>';
+}
+function binderScreen(msg){
+ const cat=msg?.catalog;if(!cat)return shellTop()+'<div class="notice">Binder data is loading…</div>';
+ const binder=cat.binder||[],pageN=Math.max(0,Math.min(19,binderPage)),entries=binder.slice(pageN*9,pageN*9+9),seen=new Set(loadCollection().seen||[]),playable=binder.filter(x=>x.playable),seenCount=playable.filter(x=>seen.has(x.id)).length;
+ const chapter=entries[0]?.act||"Season 1";
+ return shellTop()+(rulesOpen?rules():"")+'<main class="binder-wrap"><div class="binder-head"><div><div class="eyebrow">COLLECTION ALPHA · SEASON 1</div><h1>Memory Binder</h1><div class="small">'+esc(chapter)+'</div></div><div class="binder-stats"><b>'+seenCount+' / '+playable.length+'</b><br>playable cards discovered<br><span>180 story slots</span></div></div>'+
+ '<div class="binder-nav"><button class="btn" data-binder-page="'+Math.max(0,pageN-1)+'" '+(pageN===0?'disabled':'')+'>←</button><div class="binder-chapter">PAGE '+(pageN+1)+' / 20 · '+esc(chapter)+'</div><button class="btn" data-binder-page="'+Math.min(19,pageN+1)+'" '+(pageN===19?'disabled':'')+'>→</button></div>'+
+ '<div class="binder-grid">'+entries.map(e=>{if(e.playable){const c=cat.cards[e.id],isSeen=seen.has(e.id);return '<button class="binder-slot playable '+(isSeen?'seen':'')+'" data-binder-card="'+e.id+'">'+conceptArt(e.id,c,false)+'<div class="binder-slot-copy"><div class="binder-slot-id">'+e.s1+' · '+rarityName(e.rarity)+'</div><div class="binder-slot-title">'+esc(e.title)+'</div></div><div class="binder-slot-state">'+(isSeen?'DISCOVERED':'UNSEEN')+'</div></button>'}return '<div class="binder-slot planned"><div class="binder-lock">◇</div><div class="binder-slot-copy"><div class="binder-slot-id">'+e.s1+'</div><div class="binder-slot-title">'+esc(e.title)+'</div></div><div class="binder-slot-state">SEASON 1</div></div>'}).join("")+'</div>'+
+ '<div class="notice" style="margin-top:10px"><b>Collection Alpha:</b> cards become “discovered” when you see them in your hand, battlefield or Draft. This is local-device persistence for v0.12; account sync is a v1.0 gate.</div></main>';
+}
 function game(v,msg){
  const log=v.log?.[0]||"";
  if(msg.status==="over")return shellTop()+(rulesOpen?rules():"")+hud(v,msg)+result(v,msg)+sceneTabs(v)+scene(v)+(log?'<div class="last-action">Final action · '+esc(log)+'</div>':'')+(errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
- return shellTop()+(rulesOpen?rules():"")+hud(v,msg)+coach(v,msg)+sceneTabs(v)+scene(v)+context(v)+hand(v)+tools(v)+(log?'<div class="last-action">Last action · '+esc(log)+'</div>':'')+(errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
+ return shellTop()+(rulesOpen?rules():"")+'<div class="play-shell"><div class="play-board">'+hud(v,msg)+coach(v,msg)+sceneTabs(v)+scene(v)+'</div><div class="play-action">'+context(v)+tools(v)+'</div><div class="play-hand">'+hand(v)+'</div></div>'+(log?'<div class="last-action">Last action · '+esc(log)+'</div>':'')+(errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
 }
+
+function paint(html,msg){root.innerHTML=html+(inspectCardId?inspectPanel(msg):"")}
 function render(msg){
- last=msg;const v=msg.view;
- if(msg.status==="drafting"&&msg.draft){root.innerHTML=draftScreen(msg);return}
- if(!v){root.innerHTML=draftSetupOpen?draftSetup(msg):lobby(msg);return}
- if(v.phase==="choose"){root.innerHTML=deckLabOpen?deckLab(v,msg):chooseDeck(v,msg);return}
- root.innerHTML=game(v,msg);
+ last=msg;discoverFromMessage(msg);const v=msg.view;
+ if(binderOpen){paint(binderScreen(msg),msg);return}
+ if(msg.status==="drafting"&&msg.draft){paint(draftScreen(msg),msg);return}
+ if(!v){paint(draftSetupOpen?draftSetup(msg):lobby(msg),msg);return}
+ if(v.phase==="choose"){paint(deckLabOpen?deckLab(v,msg):chooseDeck(v,msg),msg);return}
+ paint(game(v,msg),msg);
 }
 function clearSelection(){selectedCard=null;selectedUnit=null;pendingTarget=null;mode=null}
 function revealContext(){requestAnimationFrame(()=>{const el=document.querySelector(".context");if(el)el.scrollIntoView({behavior:"smooth",block:"nearest"})})}
