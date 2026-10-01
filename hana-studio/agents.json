@@ -1,0 +1,74 @@
+{
+  "version": "0.12",
+  "agents": [
+    [
+      "studio_producer",
+      "Studio Producer",
+      "orchestration"
+    ],
+    [
+      "canon_keeper",
+      "Canon Keeper",
+      "worldbuilding and flavor"
+    ],
+    [
+      "set_designer",
+      "Set Designer",
+      "card/set design"
+    ],
+    [
+      "balance_lab",
+      "Balance Lab",
+      "simulation and balance"
+    ],
+    [
+      "mobile_table",
+      "Mobile Table",
+      "phone UX/game feel"
+    ],
+    [
+      "visual_systems",
+      "Visual Systems",
+      "cards/art direction"
+    ],
+    [
+      "archive",
+      "Archive / Collection",
+      "binder and collection"
+    ],
+    [
+      "source_rights",
+      "Source / Rights",
+      "research attribution and rights flags"
+    ],
+    [
+      "qa_release",
+      "QA / Release",
+      "regression and release gates"
+    ],
+    [
+      "signal",
+      "Signal / Playtest Analyst",
+      "telemetry and player evidence"
+    ],
+    [
+      "engine",
+      "Engine / Infra",
+      "server reliability"
+    ],
+    [
+      "community_ops",
+      "Community / Playtest Ops",
+      "human testing"
+    ]
+  ],
+  "human_final_authority": [
+    "canon",
+    "ethics",
+    "art approval",
+    "rules changes",
+    "public release",
+    "partnerships",
+    "monetization"
+  ]
+}
