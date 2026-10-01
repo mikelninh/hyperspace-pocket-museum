@@ -100,14 +100,7 @@ function deck(v,p){const k=v.selectedDeck?.[p];return k?v.deckInfo[k]:null}
 const leadForColor={flame:"hana",tide:"le",bloom:"rei",veil:"firefly"};
 const colorName={flame:"Flame",tide:"Tide",bloom:"Bloom",veil:"Veil"};
 function ccolors(c){return Array.isArray(c.colors)?c.colors:[c.e]}
-const CARD_ART={
- h_ft:"art/blue-hour-promise.webp",
- h_fb:"art/sunrise-overdrive.webp",
- h_fv:"art/maskflare-ambush.webp",
- h_tb:"art/garden-circuit.webp",
- h_tv:"art/silent-reroute.webp",
- h_bv:"art/midnight-prototype.webp"
-};
+const CARD_ART={};
 function artImg(id,cls=""){return CARD_ART[id]?'<img class="'+cls+'" src="'+CARD_ART[id]+'" alt="" loading="lazy" decoding="async">':""}
 function colorDots(colors){return '<span class="color-dots">'+colors.map(x=>'<i class="'+x+'"></i>').join("")+'</span>'}
 function labList(){const out=[];for(const [id,n] of Object.entries(labCounts))for(let i=0;i<n;i++)out.push(id);return out}
