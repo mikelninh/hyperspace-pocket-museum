@@ -337,7 +337,7 @@ function sceneTabs(v){
 function unitHTML(v,u,si,own){
  const c=v.cards[u.cardId],target=isValidTarget(v,u,si);
  return '<button class="unit '+c.e+' '+(u.ready?'':'exhausted ')+(selectedUnit===u.uid?'selected ':'')+(target?'target':'')+'" data-unit="'+esc(u.uid)+'" '+((!v.yourTurn&&!target)||(!own&&!target&&mode!=="challenge")?'disabled':'')+'>'+
- '<div class="unit-name">'+esc(c.n)+'</div><div class="unit-stats"><span class="p">P '+cardPower(v,u,si)+'</span> · <span class="h">HP '+u.hp+'/'+u.maxHp+'</span></div><div class="unit-state">'+(u.ready?'READY':'USED')+'</div></button>';
+ '<div class="unit-mini-art">'+conceptArt(u.cardId,c,true)+'</div><div class="unit-name">'+esc(c.n)+'</div><div class="unit-stats"><span class="p">P '+cardPower(v,u,si)+'</span> · <span class="h">HP '+u.hp+'/'+u.maxHp+'</span></div><div class="unit-state">'+(u.ready?'READY':'USED')+'</div></button>';
 }
 function isValidTarget(v,u,si){
  if(!selectedCard)return mode==="challenge"&&u.owner===v.opponent&&si===activeScene;
@@ -359,25 +359,26 @@ function scene(v){
  '<div class="zone"><div class="zone-label"><span>You</span><span>'+yp+' Power</span></div><div class="unit-row">'+(own.length?own.map(u=>unitHTML(v,u,activeScene,true)).join(""):'<div class="empty">PLAY HERE</div>')+'</div></div></section>';
 }
 function cardHTML(v,x){
- const c=v.cards[x.cardId],price=v.playCosts[x.uid]??c.c,afford=price<=v.energy[v.you];
+ const c=v.cards[x.cardId],price=v.playCosts[x.uid]??c.c,afford=price<=v.energy[v.you],r=rarityOf(c);
+ const art=CARD_ART[x.cardId]?artImg(x.cardId,"card-art-img"):conceptArt(x.cardId,c,false);
  return '<button class="card '+c.e+' '+(c.hybrid?'hybrid ':'')+(c.sig?'signature ':'')+(c.finisher?'finisher ':'')+(afford?'':'disabled ')+(selectedCard?.uid===x.uid?'selected':'')+'" data-card="'+esc(x.uid)+'" '+(!v.yourTurn?'disabled':'')+'>'+
- '<div class="card-art '+(CARD_ART[x.cardId]?'has-art':'')+'">'+(CARD_ART[x.cardId]?artImg(x.cardId,"card-art-img"):elementGlyph(c.e))+(c.finisher?'<span class="playtag">FINISHER</span>':afford?'<span class="playtag">PLAY</span>':'')+'</div><div class="card-cost">'+price+'</div><div class="card-body"><div class="card-name">'+esc(c.n)+'</div><div class="card-type">'+(c.s1?esc(c.s1)+' · ':'')+(c.hybrid?'AFTER HOURS · '+ccolors(c).map(x=>esc(colorName[x])).join(' / '):esc(c.e))+' · '+esc(c.t)+(c.sig?' · SIGNATURE':'')+'</div><div class="card-text">'+esc(c.x)+'</div></div>'+
- '<div class="card-foot">'+(c.t==="character"?'<span>P '+c.p+'</span><span>HP '+c.h+'</span>':'<span>'+c.t.toUpperCase()+'</span><span>'+price+' E</span>')+'</div></button>';
+ '<div class="card-art '+(CARD_ART[x.cardId]?'has-art':'')+'">'+art+(c.finisher?'<span class="playtag">FINISHER</span>':afford?'<span class="playtag">PLAY</span>':'')+'</div><div class="card-cost">'+price+'</div><div class="card-body"><div class="card-name">'+esc(c.n)+'</div><div class="card-type">'+(c.s1?esc(c.s1)+' · ':'')+(c.hybrid?'AFTER HOURS · '+ccolors(c).map(x=>esc(colorName[x])).join(' / '):esc(c.e))+' · '+esc(c.t)+(c.sig?' · SIGNATURE':'')+'</div><div class="card-text">'+esc(c.x)+'</div>'+(c.fl?'<div class="card-flavor-peek">“'+esc(c.fl)+'”</div>':'')+'</div>'+
+ '<div class="card-foot">'+(c.t==="character"?'<span>P '+c.p+'</span><span>HP '+c.h+'</span>':'<span>'+c.t.toUpperCase()+'</span><span>'+price+' E</span>')+'</div><i class="card-rarity '+r+'"></i></button>';
 }
 function context(v){
  if(!v.yourTurn)return '<section class="context"><div class="context-title">Opponent is acting</div><div class="context-copy">Watch how the board changes. Your turn comes after one action.</div></section>';
  if(selectedCard){
-  const c=v.cards[selectedCard.cardId],price=v.playCosts[selectedCard.uid]??c.c;
-  if(price>v.energy[v.you])return '<section class="context"><div class="context-title">'+esc(c.n)+'</div><div class="context-copy">Costs '+price+' Energy. You have '+v.energy[v.you]+'. Choose another card or use Overdrive.</div><div class="context-actions"><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
-  if(c.t==="character")return '<section class="context"><div class="context-title">PLAY '+esc(c.n)+'</div><div class="context-copy">Put this character into <b>'+esc(v.scenes[activeScene].name)+'</b>.</div><div class="context-actions"><button class="btn primary full" data-play-card="'+esc(selectedCard.uid)+'" data-play-scene="'+activeScene+'">Play here · '+price+' Energy</button><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
-  if(c.t==="moment"&&c.target==="none")return '<section class="context"><div class="context-title">PLAY '+esc(c.n)+'</div><div class="context-copy">'+esc(c.x)+'</div><div class="context-actions"><button class="btn primary full" data-play-card="'+esc(selectedCard.uid)+'">Play now · '+price+' Energy</button><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
+  const c=v.cards[selectedCard.cardId],price=v.playCosts[selectedCard.uid]??c.c,fl=c.fl?'<div class="context-flavor">“'+esc(c.fl)+'”</div>':'';
+  if(price>v.energy[v.you])return '<section class="context"><div class="context-title">'+esc(c.n)+'</div><div class="context-copy">Costs '+price+' Energy. You have '+v.energy[v.you]+'. Choose another card or use Overdrive.</div>'+fl+'<div class="context-actions"><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
+  if(c.t==="character")return '<section class="context"><div class="context-title">PLAY '+esc(c.n)+'</div><div class="context-copy">Put this character into <b>'+esc(v.scenes[activeScene].name)+'</b>.</div>'+fl+'<div class="context-actions"><button class="btn primary full" data-play-card="'+esc(selectedCard.uid)+'" data-play-scene="'+activeScene+'">Play here · '+price+' Energy</button><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
+  if(c.t==="moment"&&c.target==="none")return '<section class="context"><div class="context-title">PLAY '+esc(c.n)+'</div><div class="context-copy">'+esc(c.x)+'</div>'+fl+'<div class="context-actions"><button class="btn primary full" data-play-card="'+esc(selectedCard.uid)+'">Play now · '+price+' Energy</button><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
   if(pendingTarget&&(c.target==="ownMove"||c.target==="enemyMove")){
     const z=locOf(v,pendingTarget);return '<section class="context"><div class="context-title">'+esc(c.n)+'</div><div class="context-copy">Choose where to move <b>'+esc(v.cards[z.u.cardId].n)+'</b>.</div><div class="context-actions">'+v.scenes.map((s,i)=>i===z.si?'':'<button class="btn" data-move-effect="'+i+'">'+esc(s.name)+'</button>').join("")+'<button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
   }
   let who=(c.t==="item"||c.target==="own")?"one of your characters":(c.target==="enemy"?"an enemy character":"a character");
   const visible=v.scenes[activeScene].units.filter(u=>isValidTarget(v,u,activeScene));
   const targetHelp=visible.length?'<b>Tap '+who+' highlighted above.</b>':'<b>No valid target in this Scene.</b> Switch Scene above or choose another card.';
-  return '<section class="context"><div class="context-title">'+esc(c.n)+'</div><div class="context-copy">'+esc(c.x)+'<br>'+targetHelp+'</div><div class="context-actions"><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
+  return '<section class="context"><div class="context-title">'+esc(c.n)+'</div><div class="context-copy">'+esc(c.x)+'<br>'+targetHelp+'</div>'+fl+'<div class="context-actions"><button class="btn ghost full" data-ui="clear">Cancel</button></div></section>';
  }
  if(mode==="challenge"&&selectedUnit){
    const z=locOf(v,selectedUnit),name=z?v.cards[z.u.cardId].n:"character";
