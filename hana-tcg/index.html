@@ -134,7 +134,7 @@ function shellTop(){
  return '<div class="shell-top"><div class="brand"><div class="brand-mark"></div><strong>HANA TCG</strong><span class="version">v0.6</span></div><button class="btn small ghost" data-ui="rules">Rules</button></div>';
 }
 function rules(){
- return '<div class="rules"><b>WIN</b> · Claim 5 Memories.<br><b>TURN</b> · Take one action, then your opponent responds.<br><b>SCENE</b> · Have more Power there, then exhaust a ready character to Claim.<br><b>ENERGY</b> · Starts at 2 and grows each round to 8.<br><b>OVERDRIVE</b> · Once per game, +2 Energy now; your max does not grow next round.</div>';
+ return '<div class="rules"><b>WIN</b> · Claim 5 Memories.<br><b>TURN</b> · Take one action, then your opponent responds.<br><b>SCENE</b> · Have more Power there, then exhaust a ready character to Claim.<br><b>ENERGY</b> · Starts at 2 and grows each round to 8.<br><b>FOCUS</b> · In multicolor decks, cards that do not share your Lead color cost +1 Energy.<br><b>OVERDRIVE</b> · Once per game, +2 Energy now; your max does not grow next round.</div>';
 }
 function lobby(msg){
  return shellTop()+(rulesOpen?rules():"")+
@@ -165,7 +165,7 @@ function poolRow(v,id){
  return '<div class="pool-card '+(c.hybrid?'hybrid':'')+'"><div class="pool-cost">'+c.c+'</div><div><div class="pool-name">'+esc(c.n)+'</div><div class="pool-meta">'+colorDots(cols)+cols.map(x=>colorName[x]).join(" / ")+' · '+esc(c.t)+(c.sig?' · signature':'')+'</div></div><div class="pool-controls"><button class="copy-btn" data-lab-minus="'+id+'" '+(n<=0?'disabled':'')+'>−</button><span class="copy-n">'+n+'</span><button class="copy-btn" data-lab-plus="'+id+'" '+(n>=2?'disabled':'')+'>+</button></div></div>';
 }
 function deckLab(v,msg){
- const primary=v.deckInfo[labLead].element,status=labStatus(v),focus=labColors.length===1?"MONO · full Focus":labColors.length===2?"DUAL · Awaken +1 step":"TRI · Awaken +2 steps";
+ const primary=v.deckInfo[labLead].element,status=labStatus(v),focus=labColors.length===1?"MONO · full Focus":labColors.length===2?"DUAL · off-Lead +1 Energy · Awaken +1":"TRI · off-Lead +1 Energy · Awaken +2";
  const order=["hana","le","rei","firefly"],allColors=["flame","tide","bloom","veil"];
  const eligible=Object.keys(v.cards).filter(id=>eligibleForLab(v.cards[id]));
  const duos=eligible.filter(id=>v.cards[id].hybrid).sort((a,b)=>v.cards[a].c-v.cards[b].c);
@@ -186,7 +186,7 @@ function hud(v,msg){
  const yd=deck(v,v.you),od=deck(v,v.opponent),your= v.yourTurn?"YOUR MOVE":(v.opponent==="BOT"?"COMPUTER MOVE":"OPPONENT MOVE");
  const ybase=yd?(v.form[v.you]?yd.form:yd.lead):"You",obase=od?(v.form[v.opponent]?od.form:od.lead):"Opponent",yname=(v.form[v.you]?"AWAKENED · ":"")+ybase,oname=v.opponent==="BOT"?(od?"Computer · "+(v.form[v.opponent]?"AWAKENED · ":"")+obase:"Computer"):((v.form[v.opponent]?"AWAKENED · ":"")+obase);
  return '<section class="hud"><div class="turnline"><div class="turnstate">'+your+'</div><div class="round">Round '+v.round+(msg.botDifficulty?' · '+esc(msg.botDifficulty.toUpperCase()):'')+'</div></div>'+
- '<div class="players"><div class="playerbox"><div class="playername">YOU · '+esc(yname)+'</div><div class="player-meta">'+dots(v.memories[v.you])+'<span>'+v.energy[v.you]+'/'+v.maxEnergy[v.you]+' Energy</span>'+(v.deckMeta?.[v.you]?colorDots(v.deckMeta[v.you].colors)+'<span>'+(v.deckMeta[v.you].focusPenalty===0?'MONO':v.deckMeta[v.you].focusPenalty===1?'DUAL +1':'TRI +2')+'</span>':'')+'</div></div><div class="versus">VS</div>'+
+ '<div class="players"><div class="playerbox"><div class="playername">YOU · '+esc(yname)+'</div><div class="player-meta">'+dots(v.memories[v.you])+'<span>'+v.energy[v.you]+'/'+v.maxEnergy[v.you]+' Energy</span>'+(v.deckMeta?.[v.you]?colorDots(v.deckMeta[v.you].colors)+'<span>'+(v.deckMeta[v.you].focusPenalty===0?'MONO':v.deckMeta[v.you].focusPenalty===1?'DUAL FOCUS':'TRI FOCUS')+'</span>':'')+'</div></div><div class="versus">VS</div>'+
  '<div class="playerbox right"><div class="playername">'+esc(oname)+'</div><div class="player-meta">'+dots(v.memories[v.opponent])+'<span>'+v.handCount[v.opponent]+' cards</span></div></div></div></section>';
 }
 function sceneTabs(v){
