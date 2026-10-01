@@ -115,8 +115,8 @@ button:disabled{cursor:default;opacity:.45}
 .inspect-backdrop{position:fixed;z-index:100;inset:0;background:#05060bdc;backdrop-filter:blur(12px);display:grid;place-items:center;padding:18px}
 .inspect-card{width:min(340px,92vw);max-height:90dvh;overflow:auto;border:1px solid #ffffff35;border-radius:18px;background:#10131a;box-shadow:0 30px 90px #000;position:relative}.inspect-art{height:235px}.inspect-art .concept-art>span{font-size:54px;left:18px;bottom:12px}.inspect-body{padding:14px}.inspect-kicker{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.inspect-title{font-size:22px;font-weight:950;letter-spacing:-.03em;margin:5px 0}.inspect-rule{font-size:12px;line-height:1.4;color:#d9dce5;margin:10px 0}.inspect-flavor{font-size:14px;line-height:1.45;font-style:italic;color:#d9caa8;border-top:1px solid var(--line);padding-top:11px;margin-top:11px}.inspect-close{position:absolute;right:10px;top:10px;z-index:3}
 @media(max-width:599px){
- html,body{height:100%;overflow:hidden}body{min-height:100dvh}
- #root{height:100dvh;overflow:hidden;padding:0 8px}
+ body{min-height:100dvh}
+ #root{min-height:100dvh;padding:0 8px}
  .shell-top{height:44px;padding:4px 0}.brand strong{font-size:11px}.version{font-size:8px}.shell-top .btn{min-height:34px;padding:0 9px;font-size:10px}
  .play-shell{height:calc(100dvh - 44px);display:grid;grid-template-rows:minmax(0,1fr) minmax(52px,auto) 170px;gap:5px;overflow:hidden}
  .play-board{min-height:0;overflow:hidden;display:grid;grid-template-rows:auto auto minmax(0,1fr)}
@@ -272,7 +272,7 @@ function pickColorCounts(d){
 function draftCardTile(d,id){
  const c=d.cards[id],cols=ccolors(c),r=rarityOf(c);
  return '<button class="draft-card '+c.e+' '+(c.hybrid?'hybrid':'')+'" data-draft-pick="'+id+'">'+
- (CARD_ART[id]?'<div class="draft-art">'+artImg(id,"draft-art-img")+'</div>':'')+
+ '<div class="draft-art">'+(CARD_ART[id]?artImg(id,"draft-art-img"):conceptArt(id,c,false))+'</div>'+
  '<div class="draft-cost">'+c.c+'</div><div class="draft-rarity">'+rarityName(r)+(c.hybrid?' · AFTER HOURS':'')+'</div>'+
  '<div class="draft-name">'+esc(c.n)+'</div><div class="draft-meta">'+colorDots(cols)+cols.map(x=>colorName[x]).join(" / ")+' · '+esc(c.t)+'</div>'+
  '<div class="draft-text">'+esc(c.x)+'</div><div class="draft-role">'+esc(draftRole(c))+'</div></button>';
