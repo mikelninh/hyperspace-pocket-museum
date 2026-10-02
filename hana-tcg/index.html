@@ -478,7 +478,7 @@ function game(v,msg){
 
 function paint(html,msg){root.innerHTML=html+(inspectCardId?inspectPanel(msg):"")}
 function render(msg){
- last=msg;discoverFromMessage(msg);const v=msg.view;
+ last=msg;if(msg.status==="over"&&!firstRunDone())markFirstRunDone();discoverFromMessage(msg);const v=msg.view;
  if(binderOpen){paint(binderScreen(msg),msg);return}
  if(msg.status==="drafting"&&msg.draft){paint(draftScreen(msg),msg);return}
  if(!v){paint(draftSetupOpen?draftSetup(msg):lobby(msg),msg);return}
@@ -487,20 +487,48 @@ function render(msg){
 }
 function clearSelection(){selectedCard=null;selectedUnit=null;pendingTarget=null;mode=null}
 function revealContext(){requestAnimationFrame(()=>{const el=document.querySelector(".context");if(el)el.scrollIntoView({behavior:"smooth",block:"nearest"})})}
-async function act(action){
- if(busy)return;try{busy=true;errorText="";const msg=await api({op:"action",action});clearSelection();render(msg)}catch(e){errorText=e.message;if(last)render(last)}finally{busy=false}
+function actionFeedback(before,after,action){
+ const bv=before?.view,av=after?.view,you=av?.you;if(!bv||!av||!you)return;
+ const gained=(av.memories?.[you]||0)>(bv.memories?.[you]||0),awakened=!bv.form?.[you]&&!!av.form?.[you];
+ if(gained)haptic([14,24,18]);else if(awakened)haptic([10,18,10,28]);else if(action?.type==="challenge")haptic([18]);else if(action?.type==="play")haptic([8]);else if(action?.type==="move")haptic([6]);
 }
-async function startBot(diff){if(busy)return;try{busy=true;errorText="";render(await api({op:"bot",difficulty:diff}))}catch(e){errorText=e.message;if(last)render(last)}finally{busy=false}}
+async function act(action){
+ if(busy)return;const before=last;
+ try{busy=true;errorText="";setBusy(action?.type==="claim"?"CLAIMING MEMORY…":"RESOLVING MOVE…");const msg=await api({op:"action",action});actionFeedback(before,msg,action);clearSelection();render(msg)}
+ catch(e){errorText=e.message;if(last)render(last)}
+ finally{busy=false;setBusy("")}
+}
+async function startBot(diff){
+ if(busy)return;try{busy=true;errorText="";setBusy("SETTING THE TABLE…");render(await api({op:"bot",difficulty:diff}))}
+ catch(e){errorText=e.message;if(last)render(last)}
+ finally{busy=false;setBusy("")}
+}
 async function startDraft(pair,lead){
- if(busy)return;try{busy=true;errorText="";draftSetupOpen=false;render(await api({op:"draftStart",pair,lead,difficulty:"rival"}))}catch(e){errorText=e.message;draftSetupOpen=true;render(last)}finally{busy=false}
+ if(busy)return;try{busy=true;errorText="";draftSetupOpen=false;setBusy("BUILDING THE DRAFT…");render(await api({op:"draftStart",pair,lead,difficulty:"rival"}))}
+ catch(e){errorText=e.message;draftSetupOpen=true;render(last)}
+ finally{busy=false;setBusy("")}
 }
 async function draftPick(id){
- if(busy)return;
- document.querySelectorAll("[data-draft-pick]").forEach(x=>x.disabled=true);
- try{busy=true;errorText="";render(await api({op:"draftPick",cardId:id}))}catch(e){errorText=e.message;render(last)}finally{busy=false}
+ if(busy)return;document.querySelectorAll("[data-draft-pick]").forEach(x=>x.disabled=true);
+ try{busy=true;errorText="";setBusy("AI IS PICKING…");render(await api({op:"draftPick",cardId:id}));haptic([6])}
+ catch(e){errorText=e.message;render(last)}
+ finally{busy=false;setBusy("")}
 }
-async function startTutorial(){if(busy)return;try{busy=true;errorText="";clearSelection();render(await api({op:"tutorial"}))}catch(e){errorText=e.message;if(last)render(last)}finally{busy=false}}
-async function shareRoom(){const u=location.href;try{if(navigator.share)await navigator.share({title:"HANA TCG",text:"Play a match with me.",url:u});else if(navigator.clipboard){await navigator.clipboard.writeText(u);errorText="Room link copied.";render(last)}else prompt("Send this room link:",u)}catch{}}
+async function startTutorial(){
+ if(busy)return;try{busy=true;errorText="";clearSelection();setBusy("SETTING THE TABLE…");render(await api({op:"tutorial"}));haptic([7])}
+ catch(e){errorText=e.message;if(last)render(last)}
+ finally{busy=false;setBusy("")}
+}
+async function goHome(){
+ if(busy)return;try{
+  busy=true;setBusy("OPENING A NEW TABLE…");markFirstRunDone();room=crypto.randomUUID().replaceAll("-","");history.replaceState(null,"",location.pathname+"?room="+room);
+  last=null;rulesOpen=false;activeScene=0;clearSelection();feedbackSent=false;errorText="";deckLabOpen=false;draftSetupOpen=false;binderOpen=false;inspectCardId=null;
+  render(await api({op:"join"}));
+ }catch(e){errorText=e.message;if(last)render(last)}
+ finally{busy=false;setBusy("")}
+}
+async function shareRoom(){const u=location.href;try{if(navigator.share)await navigator.share({title:"HANA TCG",text:"Control Scenes. Claim 5 Memories. Want a match?",url:u});else if(navigator.clipboard){await navigator.clipboard.writeText(u);errorText="Room link copied.";render(last)}else prompt("Send this room link:",u)}catch{}}
+
 root.addEventListener("click",async e=>{
  const b=e.target.closest("button");if(!b)return;
  if(b.dataset.ui==="rules"){rulesOpen=!rulesOpen;render(last);return}
