@@ -1,0 +1,103 @@
+{
+  "version": "0.12",
+  "policy": "hana-studio/INSPIRATION_POLICY.md",
+  "entries": [
+    {
+      "source_id": "after_hours_nhi",
+      "hana_asset": "Nhi — Motion Composer",
+      "source_type": "composite-original",
+      "disciplines": [
+        "choreography",
+        "sound installation",
+        "urban field recording"
+      ],
+      "transformation": "Original fictional person built from disciplines and questions, not a real individual's biography or likeness.",
+      "rights_status": "green",
+      "attribution_text": "Original HANA character; research sources to be attached when specific works inform future art/story."
+    },
+    {
+      "source_id": "after_hours_mai",
+      "hana_asset": "Mai — Solar Sculptor",
+      "source_type": "composite-original",
+      "disciplines": [
+        "public art",
+        "materials research",
+        "solar design",
+        "circular design"
+      ],
+      "transformation": "Original fictional artist-scientist; no direct living-person likeness.",
+      "rights_status": "green"
+    },
+    {
+      "source_id": "after_hours_khai",
+      "hana_asset": "Khai — Light Thief",
+      "source_type": "composite-original",
+      "disciplines": [
+        "projection art",
+        "street photography",
+        "light installations"
+      ],
+      "transformation": "Original fictional artist; individual references require separate source entries.",
+      "rights_status": "green"
+    },
+    {
+      "source_id": "after_hours_lan",
+      "hana_asset": "Lan — City Ecologist",
+      "source_type": "composite-original",
+      "disciplines": [
+        "urban ecology",
+        "biodiversity mapping",
+        "heat research"
+      ],
+      "transformation": "Original fictional researcher.",
+      "rights_status": "green"
+    },
+    {
+      "source_id": "after_hours_minh",
+      "hana_asset": "Minh — Signal Cartographer",
+      "source_type": "composite-original",
+      "disciplines": [
+        "radio",
+        "transit systems",
+        "network cartography"
+      ],
+      "transformation": "Original fictional researcher/maker.",
+      "rights_status": "green"
+    },
+    {
+      "source_id": "after_hours_vy",
+      "hana_asset": "Vy — Night Biologist",
+      "source_type": "composite-original",
+      "disciplines": [
+        "bioluminescence",
+        "night ecology",
+        "bioethics"
+      ],
+      "transformation": "Original fictional scientist.",
+      "rights_status": "green"
+    }
+  ],
+  "future_lanes": {
+    "living_people": {
+      "default": "inspiration-only",
+      "direct_name_or_likeness": "permission-required"
+    },
+    "historical_people": {
+      "default": "review",
+      "requirements": [
+        "source citation",
+        "rights review",
+        "fact/fiction distinction"
+      ]
+    },
+    "myths_legends": {
+      "default": "review",
+      "requirements": [
+        "culture/region source",
+        "living-tradition check",
+        "sensitivity review",
+        "HANA reinterpretation note"
+      ]
+    }
+  }
+}
