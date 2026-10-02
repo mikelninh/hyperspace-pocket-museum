@@ -138,7 +138,29 @@ button:disabled{cursor:default;opacity:.45}
  .binder-wrap{height:calc(100dvh - 44px);overflow:auto;padding-bottom:12px}.binder-grid{gap:4px}.binder-slot-title{font-size:7px}.binder-slot-id{font-size:6px}
 }
 @media(max-width:350px){.play-shell{grid-template-rows:minmax(0,1fr) minmax(48px,auto) 160px}.card{flex-basis:92px;height:136px}.card-art{height:48px}.card-cost{top:53px}.unit{flex-basis:82px}.scene-rule{max-width:20ch}}
-.binder-slot.canonical{border-color:#ffffff32;background:linear-gradient(145deg,#181b24,#0d0f15)}.binder-slot.canonical.flame{box-shadow:inset 0 0 0 1px #ef5a7020}.binder-slot.canonical.tide{box-shadow:inset 0 0 0 1px #5fa9ef20}.binder-slot.canonical.bloom{box-shadow:inset 0 0 0 1px #69c99a20}.binder-slot.canonical.veil{box-shadow:inset 0 0 0 1px #ad7be820}.binder-slot-flavor{font-size:6px;line-height:1.2;color:#9ea4b3;font-style:italic;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}</style>
+.binder-slot.canonical{border-color:#ffffff32;background:linear-gradient(145deg,#181b24,#0d0f15)}.binder-slot.canonical.flame{box-shadow:inset 0 0 0 1px #ef5a7020}.binder-slot.canonical.tide{box-shadow:inset 0 0 0 1px #5fa9ef20}.binder-slot.canonical.bloom{box-shadow:inset 0 0 0 1px #69c99a20}.binder-slot.canonical.veil{box-shadow:inset 0 0 0 1px #ad7be820}.binder-slot-flavor{font-size:6px;line-height:1.2;color:#9ea4b3;font-style:italic;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* v0.12.1 FIRST PLAYER PREFLIGHT */
+.first-run{padding:clamp(26px,8vh,70px) 0 28px;max-width:620px;margin:0 auto}
+.first-run h1{font-size:clamp(40px,12vw,70px);line-height:.9;letter-spacing:-.06em;margin:10px 0 14px}
+.first-run>p{font-size:15px;color:var(--muted);max-width:38ch;margin:0 0 18px}
+.first-play{width:100%;min-height:92px;border:1px solid #ffffff55;border-radius:20px;background:radial-gradient(circle at 90% 0,#ef5a7040,transparent 40%),linear-gradient(135deg,#211820,#12151d);padding:15px 17px;text-align:left;box-shadow:0 20px 60px #0005}
+.first-play span{display:block;font-size:9px;letter-spacing:.16em;color:var(--gold);font-weight:900}.first-play b{display:block;font-size:25px;margin-top:15px;letter-spacing:-.03em}
+.first-loop{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:11px 0 8px}.first-loop div{border:1px solid var(--line);border-radius:13px;background:#10131a;padding:10px;min-height:78px}.first-loop b{display:block;font-size:10px;letter-spacing:.09em;margin-bottom:7px}.first-loop span{display:block;font-size:10px;color:var(--muted);line-height:1.3}
+.first-expert{width:100%;margin-top:4px;font-size:10px;color:var(--muted)}
+.busy-pill{position:fixed;z-index:200;top:max(8px,env(safe-area-inset-top));left:50%;transform:translate(-50%,-10px);opacity:0;pointer-events:none;background:#0b0d13e8;border:1px solid #ffffff28;border-radius:99px;padding:7px 11px;font-size:8px;letter-spacing:.14em;font-weight:950;color:var(--text);box-shadow:0 10px 30px #0008;transition:opacity .16s ease,transform .16s ease}.busy-pill.show{opacity:1;transform:translate(-50%,0)}
+.is-busy button:not(.inspect-close){pointer-events:none}
+.result-meta{color:var(--muted);font-size:11px}.result{animation:resultIn .3s ease-out}
+.your-moment{display:grid;grid-template-columns:54px 1fr;gap:9px;align-items:center;border:1px solid #efc66b44;border-radius:13px;background:linear-gradient(135deg,#1a1713,#11141b);padding:8px;margin:11px 0}.your-moment.text{grid-template-columns:1fr}.moment-art{width:54px;height:66px;border-radius:8px;overflow:hidden;border:1px solid #ffffff1c}.your-moment b{display:block;font-size:13px;margin:2px 0}.your-moment span{display:block;font-size:9px;line-height:1.35;color:#c5bda8}
+.result-actions{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}.result-actions .btn{width:100%}
+.feedback input{min-height:44px;border:1px solid var(--line);background:#171b25;border-radius:10px;padding:0 9px;color:var(--text);font:inherit}.feedback input::placeholder{color:#737987}.feedback-grid #remember{grid-column:1/-1}
+.scene-tab.claimable{animation:claimGlow 1.5s ease-in-out infinite}.unit.target{animation:targetPulse .9s ease-in-out infinite}.card.selected{animation:cardLift .18s ease-out}
+@keyframes cardLift{0%{transform:translateY(0) scale(.98)}100%{transform:translateY(-1px) scale(1)}}
+@keyframes targetPulse{0%,100%{box-shadow:0 0 0 0 #efc66b22}50%{box-shadow:0 0 0 4px #efc66b20}}
+@keyframes claimGlow{0%,100%{box-shadow:0 0 0 0 #efc66b00}50%{box-shadow:0 0 14px #efc66b28}}
+@keyframes resultIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:599px){.first-run{padding:28px 4px 18px;min-height:calc(100dvh - 44px);display:flex;flex-direction:column;justify-content:center}.first-loop{grid-template-columns:1fr;gap:5px}.first-loop div{min-height:0;display:grid;grid-template-columns:80px 1fr;gap:6px;align-items:center;padding:8px}.first-loop b{margin:0}.first-run h1{font-size:45px}.first-play{min-height:82px}.result-actions{grid-template-columns:1fr 1fr}.busy-pill{top:48px}}
+@media(prefers-reduced-motion:reduce){.scene-tab.claimable,.unit.target,.card.selected,.result,.busy-pill{animation:none!important;transition:none!important}}
+</style>
 </head>
 <body>
 <main id="root" aria-live="polite">Loading HANA…</main>
