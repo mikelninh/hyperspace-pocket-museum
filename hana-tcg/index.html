@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#090a0f">
-<title>HANA TCG — Playtest v0.12</title>
-<meta name="description" content="HANA TCG v0.12 vertical slice: mobile table, flavor text, Binder and Collection alpha.">
+<title>HANA TCG — First Player Build v0.12.1</title>
+<meta name="description" content="HANA TCG — a fast spatial trading card game. Play, control Scenes, and claim 5 Memories.">
 <style>
 :root{
   color-scheme:dark;
@@ -48,7 +48,7 @@ button:disabled{cursor:default;opacity:.45}
 @media(max-width:350px){#root{padding-left:8px;padding-right:8px}.players{gap:5px}.playername{font-size:10px}.scene-tab{padding:5px}.scene-tab strong{font-size:8px}.context-actions{grid-template-columns:1fr}.context-actions .btn.full{grid-column:auto}.card{flex-basis:118px}.mode-row{grid-template-columns:1fr}.rule-strip{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
 
-/* v0.12 DECK LAB */
+/* v0.12.1 DECK LAB */
 .lab-entry{border:1px solid #ffffff38;border-radius:16px;background:radial-gradient(circle at 90% 0,#5fa9ef25,transparent 35%),radial-gradient(circle at 10% 100%,#ef5a7020,transparent 35%),#11141c;padding:14px;margin:10px 0 14px;text-align:left}
 .lab-entry strong{display:block;font-size:18px;margin:10px 0 4px}.lab-entry span{font-size:11px;color:var(--muted)}
 .lab-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0}.lab-title{font-size:24px;font-weight:950;letter-spacing:-.035em}
@@ -68,7 +68,7 @@ button:disabled{cursor:default;opacity:.45}
 .card.hybrid{border-color:#efc66b78;box-shadow:inset 0 0 0 1px #ffffff0d}.card.hybrid .playtag{color:var(--gold)}
 .deck-colors{display:inline-flex;gap:3px;vertical-align:middle}.deck-colors i{width:7px;height:7px;border-radius:50%}
 
-/* v0.12 DRAFT */
+/* v0.12.1 DRAFT */
 .draft-entry{width:100%;border:1px solid #efc66b66;border-radius:18px;padding:16px;background:radial-gradient(circle at 84% 0,#efc66b20,transparent 35%),linear-gradient(145deg,#19171d,#10131a);text-align:left;margin:10px 0}.draft-entry strong{display:block;font-size:21px;margin:14px 0 5px}.draft-entry span{color:var(--muted);font-size:11px}
 .draft-pairs{display:grid;gap:8px;margin:12px 0 24px}.draft-pair{border:1px solid var(--line);border-radius:15px;background:#11141c;padding:12px}.draft-pair h3{font-size:15px;margin:3px 0}.draft-pair-bio{font-size:10px;line-height:1.35;color:var(--muted);min-height:41px;margin:5px 0 10px}.draft-pair-name{font-size:10px;color:var(--gold);font-weight:850;margin:4px 0 9px}.draft-leads{display:grid;grid-template-columns:1fr 1fr;gap:6px}.draft-leads .btn{font-size:11px;padding:0 7px}
 .draft-top{position:sticky;top:0;z-index:16;background:#090a0ff2;padding:8px 0 6px;backdrop-filter:blur(12px)}.draft-progress{display:flex;justify-content:space-between;align-items:end;gap:8px}.draft-progress strong{font-size:21px}.draft-progress span{font-size:10px;color:var(--muted)}
@@ -80,7 +80,7 @@ button:disabled{cursor:default;opacity:.45}
 @media(max-width:350px){.draft-offer{grid-template-columns:1fr}.draft-card{min-height:132px}.draft-leads{grid-template-columns:1fr}}
 .card-art.has-art{display:block}.card-art-img{width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block}.card-art.has-art:after{background:linear-gradient(0deg,#08090db8,transparent 75%);height:24px}.draft-art{height:92px;margin:-9px -9px 8px;overflow:hidden;border-bottom:1px solid #ffffff1c;background:#0a0b10}.draft-art-img{width:100%;height:100%;object-fit:cover;object-position:center 35%;display:block}.draft-card.hybrid:has(.draft-art){min-height:235px}.pool-card.hybrid .pool-cost{border-color:#efc66b66;color:var(--gold)}
 
-/* v0.12 MOBILE TABLE + CARD OBJECTS */
+/* v0.12.1 MOBILE TABLE + CARD OBJECTS */
 .top-actions{display:flex;gap:5px}
 .play-shell{display:block}
 .play-board,.play-action,.play-hand{min-width:0}
@@ -148,8 +148,17 @@ let room=new URLSearchParams(location.search).get("room");
 if(!room){room=crypto.randomUUID().replaceAll("-","");history.replaceState(null,"",location.pathname+"?room="+room)}
 const PK="hana-tcg-player";let player=localStorage.getItem(PK);if(!player){player=crypto.randomUUID();localStorage.setItem(PK,player)}
 const root=document.querySelector("#root");
-let last=null,busy=false,rulesOpen=false,activeScene=0,selectedCard=null,selectedUnit=null,pendingTarget=null,mode=null,feedbackSent=false,errorText="",deckLabOpen=false,draftSetupOpen=false,binderOpen=false,binderPage=0,inspectCardId=null,labLead="hana",labColors=["flame","tide"],labCounts={};
+const FIRST_RUN_KEY="hana-first-match-v0121";let last=null,busy=false,busyLabel="",slowTimer=null,rulesOpen=false,activeScene=0,selectedCard=null,selectedUnit=null,pendingTarget=null,mode=null,feedbackSent=false,errorText="",deckLabOpen=false,draftSetupOpen=false,binderOpen=false,binderPage=0,inspectCardId=null,advancedOpen=localStorage.getItem(FIRST_RUN_KEY)==="1",labLead="hana",labColors=["flame","tide"],labCounts={};
 
+function firstRunDone(){return localStorage.getItem(FIRST_RUN_KEY)==="1"}
+function markFirstRunDone(){localStorage.setItem(FIRST_RUN_KEY,"1");advancedOpen=true}
+function setBusy(label=""){
+ busyLabel=label;document.documentElement.classList.toggle("is-busy",!!label);
+ let el=document.querySelector(".busy-pill");if(!el){el=document.createElement("div");el.className="busy-pill";document.body.appendChild(el)}
+ el.textContent=label;el.classList.toggle("show",!!label);clearTimeout(slowTimer);
+ if(label)slowTimer=setTimeout(()=>{if(busyLabel){busyLabel="STILL CONNECTING…";el.textContent=busyLabel}},1200);
+}
+function haptic(pattern){try{if(navigator.vibrate&&!matchMedia("(prefers-reduced-motion: reduce)").matches)navigator.vibrate(pattern)}catch{}}
 async function api(body){
  const r=await fetch(API,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({...body,room,player})});
  const j=await r.json();if(!r.ok)throw new Error(j.error||"Request failed");return j;
@@ -220,18 +229,28 @@ function scenePower(v,p,si){return v.scenes[si].units.filter(u=>u.owner===p).red
 function canClaim(v,si){return v.yourTurn&&!v.claimed[v.you]&&scenePower(v,v.you,si)>scenePower(v,v.opponent,si)&&v.scenes[si].units.some(u=>u.owner===v.you&&u.ready)}
 function locOf(v,uid){for(let si=0;si<3;si++){const u=v.scenes[si].units.find(x=>x.uid===uid);if(u)return {si,u}}return null}
 function shellTop(){
- return '<div class="shell-top"><div class="brand"><div class="brand-mark"></div><strong>HANA TCG</strong><span class="version">v0.12</span></div><div class="top-actions"><button class="btn small ghost" data-ui="binder">Binder</button><button class="btn small ghost" data-ui="rules">Rules</button></div></div>';
+ const binder=(advancedOpen||firstRunDone())?'<button class="btn small ghost" data-ui="binder">Binder</button>':'';
+ return '<div class="shell-top"><div class="brand"><div class="brand-mark"></div><strong>HANA TCG</strong><span class="version">v0.12.1</span></div><div class="top-actions">'+binder+'<button class="btn small ghost" data-ui="rules">Rules</button></div></div>';
 }
 function rules(){
  return '<div class="rules"><b>WIN</b> · Claim 5 Memories.<br><b>TURN</b> · Take one action, then your opponent responds.<br><b>SCENE</b> · Have more Power there, then exhaust a ready character to Claim.<br><b>ENERGY</b> · Starts at 2 and grows each round to 8.<br><b>FOCUS</b> · In multicolor decks, off-Lead cards pay Focus: +1 Energy in dual decks, +2 in three-color decks.<br><b>OVERDRIVE</b> · Once per game, +2 Energy now; your max does not grow next round.</div>';
 }
-function lobby(msg){
+function firstRunLobby(msg){
  return shellTop()+(rulesOpen?rules():"")+
- '<section class="hero"><div class="eyebrow">v0.12 · VERTICAL SLICE</div><h1>Play it.<br>Collect the story.</h1><p>80 playable cards now carry flavor text inside a 180-card Season 1 Binder. Mobile play is being treated as the primary table.</p></section>'+
- '<button class="draft-entry" data-ui="draft-setup"><div class="eyebrow">NEW · v0.12 DUO DRAFT</div><strong>Draft 24 cards vs AI →</strong><span>Choose a color pair + Lead · 6 waves · 8 cards per wave · play immediately</span></button>'+
- '<div class="mode"><button class="mode-main" data-ui="tutorial"><div class="eyebrow">Learn the core game</div><strong>Learn with Hana →</strong><span>Hana vs Le · guided opening hand</span></button>'+
- '<div><div class="eyebrow" style="margin:3px 0 7px">CONSTRUCTED VS COMPUTER</div><div class="mode-row"><button class="btn" data-ui="bot" data-diff="rookie">Rookie</button><button class="btn primary" data-ui="bot" data-diff="rival">Rival</button><button class="btn" data-ui="bot" data-diff="weaver">Weaver</button></div></div></div>'+
- '<div class="rule-strip"><div><b>80</b>Playable cards</div><div><b>180</b>Binder slots</div><div><b>24</b>Draft deck</div></div>'+
+ '<section class="first-run"><div class="eyebrow">YOUR FIRST MATCH · ~8 MIN</div><h1>Control the city.<br>Claim 5 Memories.</h1><p>No deckbuilding yet. No homework. Hana vs Le teaches itself while you play.</p>'+
+ '<button class="first-play" data-ui="tutorial"><span>PLAY YOUR FIRST MATCH</span><b>Hana vs Le →</b></button>'+
+ '<div class="first-loop"><div><b>1 · PLAY</b><span>Put a character into a Scene.</span></div><div><b>2 · CONTROL</b><span>Have more Power there.</span></div><div><b>3 · CLAIM</b><span>Exhaust a ready character. First to 5 wins.</span></div></div>'+
+ '<button class="btn ghost first-expert" data-ui="advanced">I’ve played before · show all modes</button></section>'+
+ (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
+}
+function lobby(msg){
+ if(!advancedOpen&&!firstRunDone())return firstRunLobby(msg);
+ return shellTop()+(rulesOpen?rules():"")+
+ '<section class="hero"><div class="eyebrow">FIRST PLAYER BUILD · v0.12.1</div><h1>Play it.<br>Collect the story.</h1><p>Constructed, Duo Draft, Deck Lab and the 180-slot Memory Binder.</p></section>'+
+ '<div class="mode"><button class="mode-main" data-ui="tutorial"><div class="eyebrow">FASTEST WAY IN</div><strong>Hana vs Le →</strong><span>guided opening · learn while playing</span></button>'+
+ '<div><div class="eyebrow" style="margin:3px 0 7px">VS COMPUTER</div><div class="mode-row"><button class="btn" data-ui="bot" data-diff="rookie">Rookie</button><button class="btn primary" data-ui="bot" data-diff="rival">Rival</button><button class="btn" data-ui="bot" data-diff="weaver">Weaver</button></div></div></div>'+
+ '<button class="draft-entry" data-ui="draft-setup"><div class="eyebrow">DUO DRAFT</div><strong>Draft 24 cards vs AI →</strong><span>6 waves · pick against the AI · play immediately</span></button>'+
+ '<div class="rule-strip"><div><b>80</b>Playable cards</div><div><b>180</b>Binder slots</div><div><b>5</b>Memories to win</div></div>'+
  '<button class="btn ghost" style="width:100%" data-ui="share">Play a friend · share room link</button>'+
  (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
 }
@@ -245,7 +264,7 @@ const draftPairs=[
 ];
 function draftSetup(msg){
  return shellTop()+(rulesOpen?rules():"")+
- '<div class="lab-head"><div><div class="eyebrow">v0.12 · DUO DRAFT</div><div class="lab-title">Choose your pair.</div></div><button class="btn small ghost" data-ui="draft-back">Back</button></div>'+
+ '<div class="lab-head"><div><div class="eyebrow">v0.12.1 · DUO DRAFT</div><div class="lab-title">Choose your pair.</div></div><button class="btn small ghost" data-ui="draft-back">Back</button></div>'+
  '<div class="notice"><b>How it works:</b> choose a color pair and Lead. Each pair has an AFTER HOURS anchor — an original person from Hana’s Saigon. You pick one card, the AI picks one, until both decks have 24 cards.</div>'+
  '<div class="draft-pairs">'+draftPairs.map(d=>'<section class="draft-pair">'+
  '<div>'+colorDots(d.pair)+'</div><h3>'+d.pair.map(x=>colorName[x]).join(" + ")+'</h3><div class="draft-pair-name">'+esc(d.name)+'</div><div class="draft-pair-bio">'+esc(d.bio)+'</div>'+
@@ -297,7 +316,7 @@ function chooseDeck(v,msg){
  const order=["hana","le","rei","firefly"];
  return shellTop()+(rulesOpen?rules():"")+
  '<section class="hero" style="padding-top:16px"><div class="eyebrow">'+(msg.mode==="bot"?"VS "+esc((msg.botDifficulty||"rival").toUpperCase()):"FRIEND MATCH")+'</div><h1>Choose how you want to play.</h1><p>Use a focused starter, or build your own 1–3 color deck.</p></section>'+
- '<button class="lab-entry" data-ui="decklab"><div class="eyebrow">NEW · v0.12 DECK LAB</div><strong>Build mono, dual, or tri-color →</strong><span>30 cards · max 2 copies · AFTER HOURS pair cards · no colored-mana screw</span></button>'+
+ '<button class="lab-entry" data-ui="decklab"><div class="eyebrow">NEW · v0.12.1 DECK LAB</div><strong>Build mono, dual, or tri-color →</strong><span>30 cards · max 2 copies · AFTER HOURS pair cards · no colored-mana screw</span></button>'+
  '<div class="deck-list">'+order.map(k=>{const d=v.deckInfo[k],id=identity[k];return '<button class="deck-choice '+d.element+'" data-deck="'+k+'"><div class="eyebrow">'+(d.s1?esc(d.s1)+' · ':'')+esc(d.element.toUpperCase())+'</div><h3>'+esc(d.name)+'</h3><div class="deck-tags">'+id.tags+'</div><div class="deck-copy">'+id.copy+'</div><div class="deck-awaken"><b>30 CARDS · 15 UNIQUE</b><br><b>SIGNATURES</b> · '+esc(id.sig)+'<br><b>AWAKEN</b> · '+esc(d.trigger)+'<br><span>'+esc(d.formText||"")+'</span></div></button>'}).join("")+'</div>'+
  (v.opponentLocked?'<div class="notice"><b>Opponent locked.</b> Their hero is still hidden.</div>':'')+
  (errorText?'<div class="notice">'+esc(errorText)+'</div>':'');
@@ -313,7 +332,7 @@ function deckLab(v,msg){
  const duos=eligible.filter(id=>v.cards[id].hybrid).sort((a,b)=>v.cards[a].c-v.cards[b].c);
  const regular=eligible.filter(id=>!v.cards[id].hybrid).sort((a,b)=>{const ca=v.cards[a],cb=v.cards[b];const ia=labColors.indexOf(ca.e),ib=labColors.indexOf(cb.e);return ia-ib||ca.c-cb.c||ca.n.localeCompare(cb.n)});
  return shellTop()+(rulesOpen?rules():"")+
- '<div class="lab-head"><div><div class="eyebrow">v0.12 · CONSTRUCTED LAB</div><div class="lab-title">Build your deck.</div></div><button class="btn small ghost" data-ui="decklab-back">Back</button></div>'+
+ '<div class="lab-head"><div><div class="eyebrow">v0.12.1 · CONSTRUCTED LAB</div><div class="lab-title">Build your deck.</div></div><button class="btn small ghost" data-ui="decklab-back">Back</button></div>'+
  '<section class="lab-section"><h3>1 · Choose your Lead</h3><div class="lab-chips">'+order.map(k=>'<button class="lab-chip '+v.deckInfo[k].element+' '+(labLead===k?'on':'')+'" data-lab-lead="'+k+'">'+esc(v.deckInfo[k].lead)+'</button>').join("")+'</div></section>'+
  '<section class="lab-section"><h3>2 · Choose 1–3 colors</h3><div class="lab-chips">'+allColors.map(x=>'<button class="lab-chip '+x+' '+(labColors.includes(x)?'on ':'')+(x===primary?'locked':'')+'" data-lab-color="'+x+'">'+colorName[x]+'</button>').join("")+'</div>'+
  '<div class="focus-card"><div><b>'+focus+'</b><span>'+labColors.map(x=>colorName[x]).join(" + ")+'</span></div><div style="text-align:right"><b>'+v.deckInfo[labLead].form+'</b><span>'+esc(v.deckInfo[labLead].trigger)+'</span></div></div></section>'+
@@ -413,7 +432,7 @@ function tools(v){
  return '<div class="turn-tools"><button class="btn" data-action="overdrive" '+(!v.yourTurn||v.overdriveUsed[v.you]?'disabled':'')+'>Overdrive +2</button><button class="btn" data-action="pass" '+(!v.yourTurn?'disabled':'')+'>Pass</button></div>';
 }
 function feedback(v,msg){
- if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.12 needs.</div>';
+ if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.12.1 needs.</div>';
  return '<div class="feedback"><div class="eyebrow">30-second playtest</div><div class="feedback-grid"><select id="fun"><option value="">Fun 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="clear"><option value="">Clarity 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="again"><option value="">Play again?</option><option value="yes">Yes</option><option value="no">No</option></select><button class="btn primary" data-ui="feedback">Send feedback</button></div></div>';
 }
 function result(v,msg){
@@ -438,7 +457,7 @@ function binderScreen(msg){
  return shellTop()+(rulesOpen?rules():"")+'<main class="binder-wrap"><div class="binder-head"><div><div class="eyebrow">COLLECTION ALPHA · SEASON 1</div><h1>Memory Binder</h1><div class="small">'+esc(chapter)+'</div></div><div class="binder-stats"><b>'+seenCount+' / '+playable.length+'</b><br>playable cards discovered<br><span>180 story slots</span></div></div>'+
  '<div class="binder-nav"><button class="btn" data-binder-page="'+Math.max(0,pageN-1)+'" '+(pageN===0?'disabled':'')+'>←</button><div class="binder-chapter">PAGE '+(pageN+1)+' / 20 · '+esc(chapter)+'</div><button class="btn" data-binder-page="'+Math.min(19,pageN+1)+'" '+(pageN===19?'disabled':'')+'>→</button></div>'+
  '<div class="binder-grid">'+entries.map(e=>{if(e.playable){const c=cat.cards[e.id],isSeen=seen.has(e.id);return '<button class="binder-slot playable '+(isSeen?'seen':'')+'" data-binder-card="'+e.id+'">'+conceptArt(e.id,c,false)+'<div class="binder-slot-copy"><div class="binder-slot-id">'+e.s1+' · '+rarityName(e.rarity)+'</div><div class="binder-slot-title">'+esc(e.title)+'</div></div><div class="binder-slot-state">'+(isSeen?'DISCOVERED':'UNSEEN')+'</div></button>'}if(e.kind)return '<div class="binder-slot canonical '+(e.element||'')+'"><div class="binder-lock">'+(e.kind==="lead"?'✦':'⌂')+'</div><div class="binder-slot-copy"><div class="binder-slot-id">'+e.s1+' · '+esc(e.kind.toUpperCase())+'</div><div class="binder-slot-title">'+esc(e.title)+'</div>'+(e.flavor?'<div class="binder-slot-flavor">“'+esc(e.flavor)+'”</div>':'')+'</div><div class="binder-slot-state">CANON</div></div>';return '<div class="binder-slot planned"><div class="binder-lock">◇</div><div class="binder-slot-copy"><div class="binder-slot-id">'+e.s1+'</div><div class="binder-slot-title">'+esc(e.title)+'</div></div><div class="binder-slot-state">SEASON 1</div></div>'}).join("")+'</div>'+
- '<div class="notice" style="margin-top:10px"><b>Collection Alpha:</b> cards become “discovered” when you see them in your hand, battlefield or Draft. This is local-device persistence for v0.12; account sync is a v1.0 gate.</div></main>';
+ '<div class="notice" style="margin-top:10px"><b>Collection Alpha:</b> cards become “discovered” when you see them in your hand, battlefield or Draft. This is local-device persistence for v0.12.1; account sync is a v1.0 gate.</div></main>';
 }
 function game(v,msg){
  const log=v.log?.[0]||"";
