@@ -419,10 +419,15 @@ function context(v){
 function coach(v,msg){
  if(!msg.tutorial)return "";
  const m=v.metrics?.[v.you]||{};
- if((m.plays||0)===0)return '<div class="coach"><div><b>1 · PUT SOMEONE ON THE BOARD</b>Tap a card marked PLAY. Pick the Scene you want first, then play the card there.</div></div>';
- if(v.memories[v.you]===0&&v.scenes.some((_,i)=>canClaim(v,i)))return '<div class="coach"><div><b>2 · YOU ARE AHEAD</b>Tap a ready character in the Scene you control, then Claim Memory.</div></div>';
- if(v.memories[v.you]===0)return '<div class="coach"><div><b>2 · CREATE A LEAD</b>More Power at a Scene lets you claim. Add Power, move, or challenge.</div></div>';
- if(!v.overdriveUsed[v.you]&&v.round>=2)return '<div class="coach"><div><b>3 · OVERDRIVE IS OPTIONAL</b>+2 Energy now can create a swing, but your max will not grow next round.</div></div>';
+ if((m.plays||0)===0)return '<div class="coach"><div><b>1 · PLAY</b>Put a character into a Scene. Cards marked <strong>PLAY</strong> are affordable right now.</div></div>';
+ const claimable=v.scenes.map((_,i)=>i).find(i=>canClaim(v,i));
+ if(v.memories[v.you]===0&&claimable!==undefined){
+   const yp=scenePower(v,v.you,claimable),op=scenePower(v,v.opponent,claimable),name=v.scenes[claimable].name;
+   return '<div class="coach"><div><b>2 · CONTROL → CLAIM</b>You have '+yp+' Power vs '+op+' at <strong>'+esc(name)+'</strong>. More Power means you control it. Tap a ready character there, then Claim.</div></div>';
+ }
+ if(v.memories[v.you]===0)return '<div class="coach"><div><b>2 · CONTROL</b>To score, create more total Power than Le at one Scene. Play, Move, or Challenge to change the numbers.</div></div>';
+ if(v.memories[v.you]<5&&v.round<=3)return '<div class="coach"><div><b>3 · CLAIM 5</b>You have <strong>'+v.memories[v.you]+' / 5 Memories</strong>. Keep controlling Scenes and claiming once per round.</div></div>';
+ if(!v.overdriveUsed[v.you]&&v.round>=2)return '<div class="coach"><div><b>OPTIONAL · OVERDRIVE</b>+2 Energy now can create a swing. The tradeoff: your max Energy will not grow next round.</div></div>';
  return "";
 }
 function hand(v){
@@ -433,13 +438,19 @@ function tools(v){
 }
 function feedback(v,msg){
  if(feedbackSent)return '<div class="notice"><b>Feedback saved.</b> Thank you — this is exactly what v0.12.1 needs.</div>';
- return '<div class="feedback"><div class="eyebrow">30-second playtest</div><div class="feedback-grid"><select id="fun"><option value="">Fun 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="clear"><option value="">Clarity 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="again"><option value="">Play again?</option><option value="yes">Yes</option><option value="no">No</option></select><button class="btn primary" data-ui="feedback">Send feedback</button></div></div>';
+ return '<div class="feedback"><div class="eyebrow">30-SECOND PLAYTEST</div><div class="feedback-grid"><select id="fun"><option value="">Fun 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="clear"><option value="">Clarity 1–5</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select><select id="again"><option value="">Play again?</option><option value="yes">Yes</option><option value="no">No</option></select><input id="remember" maxlength="80" placeholder="Which card do you remember most? (optional)" autocomplete="off"><button class="btn primary" data-ui="feedback">Send feedback</button></div></div>';
+}
+function yourMoment(v,m){
+ const plays=Object.entries(m.cardPlays||{}).sort((a,b)=>b[1]-a[1]),id=plays[0]?.[0],c=id?v.cards[id]:null;
+ if(c)return '<div class="your-moment"><div class="moment-art">'+conceptArt(id,c,true)+'</div><div><div class="eyebrow">YOUR MOMENT</div><b>'+esc(c.n)+'</b><span>'+(plays[0][1]>1?'You played it '+plays[0][1]+' times. ':'')+(c.fl?'“'+esc(c.fl)+'”':'')+'</span></div></div>';
+ if((m.transforms||0)>0)return '<div class="your-moment text"><div><div class="eyebrow">YOUR MOMENT</div><b>You Awakened.</b><span>Your Lead transformed during the match.</span></div></div>';
+ return '<div class="your-moment text"><div><div class="eyebrow">YOUR MOMENT</div><b>'+((m.claims||0)>0?'You claimed '+m.claims+' Memories.':'You finished your first HANA match.')+'</b><span>The next game will already feel different.</span></div></div>';
 }
 function result(v,msg){
  if(msg.status!=="over")return "";
  const m=v.metrics?.[v.you]||{},win=msg.result?.winner===v.you,score=v.memories[v.you]+"–"+v.memories[v.opponent];
  const tip=(m.claims||0)<3?"Next match: prioritize Memories over simply building the biggest board.":(m.challenges||0)===0?"Next match: try removing one key blocker with a Challenge.":(m.overdrives||0)===0?"Next match: look for one decisive Overdrive turn.":"You used the full core loop. Try a different hero next.";
- return '<section class="result"><div class="eyebrow">MATCH '+msg.matchNumber+'</div><h2>'+(win?'Victory':'Match complete')+' · '+score+'</h2><div style="color:var(--muted);font-size:11px">'+v.round+' rounds · '+v.actionCount+' actions'+(msg.firstActionMs?' · first move '+Math.max(1,Math.round(msg.firstActionMs/1000))+'s':'')+'</div><div class="result-grid"><div class="result-stat"><b>'+(m.signatures||0)+'</b><span>Signatures</span></div><div class="result-stat"><b>'+(m.highCost||0)+'</b><span>6+ Energy</span></div><div class="result-stat"><b>'+(m.claims||0)+'</b><span>Claims</span></div><div class="result-stat"><b>'+(m.transforms||0)+'</b><span>Awaken</span></div></div><div style="font-size:10px;color:var(--muted);margin:2px 0 8px">'+(m.finishers||0)+' finisher'+((m.finishers||0)===1?'':'s')+' resolved · '+(m.challenges||0)+' Challenges</div><div class="notice">'+tip+'</div>'+feedback(v,msg)+'<button class="btn primary" style="width:100%;margin-top:10px" data-ui="reset">Play again</button></section>';
+ return '<section class="result"><div class="eyebrow">MATCH '+msg.matchNumber+'</div><h2>'+(win?'Victory':'Match complete')+' · '+score+'</h2><div class="result-meta">'+v.round+' rounds · '+v.actionCount+' actions'+(msg.firstActionMs?' · first move '+Math.max(1,Math.round(msg.firstActionMs/1000))+'s':'')+'</div>'+yourMoment(v,m)+'<div class="result-grid"><div class="result-stat"><b>'+(m.signatures||0)+'</b><span>Signatures</span></div><div class="result-stat"><b>'+(m.claims||0)+'</b><span>Claims</span></div><div class="result-stat"><b>'+(m.challenges||0)+'</b><span>Fights</span></div><div class="result-stat"><b>'+(m.transforms||0)+'</b><span>Awaken</span></div></div><div class="notice">'+tip+'</div>'+feedback(v,msg)+'<div class="result-actions"><button class="btn primary" data-ui="reset">Rematch</button><button class="btn" data-ui="home">Try another hero</button></div></section>';
 }
 function inspectPanel(msg){
  if(!inspectCardId)return "";
