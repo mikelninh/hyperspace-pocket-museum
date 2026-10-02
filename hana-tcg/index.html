@@ -536,6 +536,8 @@ root.addEventListener("click",async e=>{
  if(b.dataset.ui==="inspect-close"){inspectCardId=null;render(last);return}
  if(b.dataset.binderPage!==undefined){binderPage=Math.max(0,Math.min(19,Number(b.dataset.binderPage)||0));render(last);return}
  if(b.dataset.binderCard){inspectCardId=b.dataset.binderCard;render(last);return}
+ if(b.dataset.ui==="advanced"){markFirstRunDone();render(last);return}
+ if(b.dataset.ui==="home"){await goHome();return}
  if(b.dataset.ui==="share"){await shareRoom();return}
  if(b.dataset.ui==="draft-setup"){draftSetupOpen=true;errorText="";render(last);return}
  if(b.dataset.ui==="draft-back"){draftSetupOpen=false;errorText="";render(last);return}
@@ -560,8 +562,10 @@ root.addEventListener("click",async e=>{
  if(b.dataset.labPlus){const id=b.dataset.labPlus;if(eligibleForLab(last.view.cards[id])&&(labCounts[id]||0)<2)labCounts[id]=(labCounts[id]||0)+1;render(last);return}
  if(b.dataset.labMinus){const id=b.dataset.labMinus;if((labCounts[id]||0)>0)labCounts[id]--;render(last);return}
  if(b.dataset.ui==="lab-submit"){
-   const st=labStatus(last.view);if(!st.ok)return;
-   try{busy=true;errorText="";const msg=await api({op:"action",action:{type:"selectCustomDeck",lead:labLead,cards:labList()}});deckLabOpen=false;clearSelection();render(msg)}catch(e){errorText=e.message;render(last)}finally{busy=false}return
+   const st=labStatus(last.view);if(!st.ok||busy)return;
+   try{busy=true;errorText="";setBusy("LOCKING IN DECK…");const msg=await api({op:"action",action:{type:"selectCustomDeck",lead:labLead,cards:labList()}});deckLabOpen=false;clearSelection();render(msg);haptic([7])}
+   catch(e){errorText=e.message;render(last)}
+   finally{busy=false;setBusy("")}return
  }
  if(b.dataset.deck){await act({type:"selectDeck",deck:b.dataset.deck});return}
  if(b.dataset.scene!==undefined){activeScene=Math.max(0,Math.min(2,Number(b.dataset.scene)||0));render(last);return}
@@ -592,14 +596,16 @@ root.addEventListener("click",async e=>{
  if(b.dataset.unitAction==="claim"&&selectedUnit){await act({type:"claim",uid:selectedUnit});return}
  if(b.dataset.ui==="challenge"){mode="challenge";render(last);revealContext();return}
  if(b.dataset.action){await act({type:b.dataset.action});return}
- if(b.dataset.ui==="reset"){try{feedbackSent=false;clearSelection();render(await api({op:"reset"}))}catch(e){errorText=e.message;render(last)}return}
+ if(b.dataset.ui==="reset"){if(busy)return;try{busy=true;setBusy("SHUFFLING AGAIN…");feedbackSent=false;clearSelection();render(await api({op:"reset"}));haptic([7])}catch(e){errorText=e.message;render(last)}finally{busy=false;setBusy("")}return}
  if(b.dataset.ui==="feedback"){
-   const fun=Number(document.querySelector("#fun")?.value),clarity=Number(document.querySelector("#clear")?.value),again=document.querySelector("#again")?.value;
-   if(!fun||!clarity||!again){errorText="Please answer all three playtest questions.";render(last);return}
-   try{await api({op:"feedback",funScore:fun,clarityScore:clarity,rematch:again==="yes"});feedbackSent=true;errorText="";render(last)}catch(e){errorText=e.message;render(last)}return;
+   const fun=Number(document.querySelector("#fun")?.value),clarity=Number(document.querySelector("#clear")?.value),again=document.querySelector("#again")?.value,memorable=document.querySelector("#remember")?.value||"";
+   if(!fun||!clarity||!again){errorText="Please answer Fun, Clarity, and Play again.";render(last);return}
+   if(busy)return;try{busy=true;setBusy("SAVING FEEDBACK…");await api({op:"feedback",funScore:fun,clarityScore:clarity,rematch:again==="yes",memorableCard:memorable});feedbackSent=true;errorText="";render(last);haptic([6])}
+   catch(e){errorText=e.message;render(last)}
+   finally{busy=false;setBusy("")}return;
  }
 });
-async function boot(){try{render(await api({op:"join"}))}catch(e){root.innerHTML=shellTop()+'<div class="notice">Could not join: '+esc(e.message)+'</div>'}}
+async function boot(){try{setBusy("CONNECTING…");render(await api({op:"join"}))}catch(e){root.innerHTML=shellTop()+'<div class="notice">Could not join: '+esc(e.message)+'</div>'}finally{setBusy("")}}
 setInterval(async()=>{if(busy)return;try{const msg=await api({op:"state"});if(!last||msg.version!==last.version||msg.status!==last.status)render(msg)}catch{}},900);
 boot();
 </script>
